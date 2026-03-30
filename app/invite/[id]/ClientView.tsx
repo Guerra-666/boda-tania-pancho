@@ -240,7 +240,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           {/* QUOTE + PARENTS */}
           <section className="mobile-sec sr text-center no-print">
             <div className="orn-row"><div className="orn-l"/><HeartIcon size={11} className="text-[#D4B778]"/><div className="orn-l"/></div>
-            <blockquote className="quote-text mt-7">"Donde tú vayas, yo iré,<br/>y donde tú vivas,<br/>yo viviré."</blockquote>
+            <blockquote className="quote-text mt-7">"Nuestro amor ha crecido con cada día compartido y ahora queremos sellarlo con una promesa eterna. Nos llenaría de felicidad contar con tu presencia en este día tan especial."</blockquote>
             <div className="orn-row mt-7 mb-10"><div className="orn-l"/><HeartIcon size={11} className="text-[#D4B778]"/><div className="orn-l"/></div>
             <p className="eyebrow mb-7">Con la bendición de nuestros padres</p>
             <div className="parents-grid">
