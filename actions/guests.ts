@@ -29,25 +29,6 @@ export async function createGuest(formData: FormData) {
   }
 }
 
-// 4. Editar un invitado existente (Uso en Dashboard)
-export async function editGuest(formData: FormData) {
-  const id = formData.get('id') as string;
-  const name = formData.get('name') as string;
-  const phone = formData.get('phone') as string;
-  const ticketsTotal = parseInt(formData.get('ticketsTotal') as string);
-
-  try {
-    await db.update(guests)
-      .set({ name, phone, ticketsTotal })
-      .where(eq(guests.id, id));
-
-    revalidatePath('/dashboard');
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: "Error al actualizar" };
-  }
-}
-
 export async function deleteGuest(id: string) {
   try {
     await db.delete(guests).where(eq(guests.id, id));
@@ -58,13 +39,39 @@ export async function deleteGuest(id: string) {
   }
 }
 
-// Actualizar RSVP (Página Pública del Invitado) - AHORA GUARDA EL MENSAJE
+// 🟢 AQUÍ ESTÁ LA FUNCIÓN QUE FALTABA PARA EDITAR INVITADOS
+export async function editGuest(formData: FormData) {
+  const id = formData.get('id') as string;
+  const name = formData.get('name') as string;
+  const phone = formData.get('phone') as string;
+  const ticketsTotal = parseInt(formData.get('ticketsTotal') as string);
+
+  if (!id || !name || !phone || isNaN(ticketsTotal)) return { error: "Datos incompletos" };
+
+  try {
+    await db.update(guests)
+      .set({
+        name,
+        phone,
+        ticketsTotal,
+        updatedAt: new Date().toISOString()
+      })
+      .where(eq(guests.id, id));
+
+    revalidatePath('/dashboard');
+    return { success: true };
+  } catch (e) {
+    return { error: "Error al actualizar" };
+  }
+}
+
+// Actualizar RSVP (Página Pública del Invitado)
 export async function updateRsvp(formData: FormData) {
   const id = formData.get('id') as string;
   const status = formData.get('status') as 'confirmed' | 'declined';
   const ticketsConfirmed = parseInt(formData.get('ticketsConfirmed') as string || '0');
   const dietary = formData.get('dietary') as string;
-  const message = formData.get('message') as string; // ¡Nuevo campo para el Muro de los Deseos!
+  const message = formData.get('message') as string;
 
   if (!id || !status) return { error: "ID o Estado faltante" };
 

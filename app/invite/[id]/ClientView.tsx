@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+
 import { QRCodeSVG } from 'qrcode.react';
 import { updateRsvp } from '../../../actions/guests';
 
@@ -57,17 +58,6 @@ const MOCK_WISHES = [
   { name: "Tía Martha", text: "Verlos dar este paso me llena de orgullo y emoción. Que Dios bendiga su matrimonio todos los días de su vida." }
 ];
 
-/* ============================================================================
-  NOTA PARA EL BACKEND (page.tsx):
-  En tu Server Component (page.tsx), obtén los mensajes así y pásalos a messages:
-
-  const allGuests = await db.select().from(guests);
-  const guestMessages = allGuests
-    .filter(g => g.message && g.message.trim() !== '')
-    .map(g => ({ name: g.name, text: g.message }));
-
-  return <ClientView guest={guest} messages={guestMessages} />;
-============================================================================ */
 
 export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: any, messages?: { name: string, text: string }[] }) {
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
@@ -462,18 +452,18 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               </div>
             ) : (
               <div className="rsvp-card no-print">
-                <div className="rsvp-stripe" />
-                <div className="text-center mb-8">
-                  <p className="eyebrow mb-3">R · S · V · P</p>
-                  <h2 className="rsvp-title">Confirma tu Asistencia</h2>
-                  <p className="rsvp-sub mt-2">Pase exclusivo para</p>
-                  <p className="rsvp-guest">{guest.name}</p>
-                </div>
-                <div className="tickets-pill">Pases disponibles: <strong className="ml-1 text-[#4A5D23]">{guest.ticketsTotal}</strong></div>
-                <form action={updateRsvp} onSubmit={() => setIsSubmitting(true)} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
-                  <input type="hidden" name="id" value={guest.id} />
-                  <div className="field-group">
-                    <label className="field-label">¿Cuántos asistirán?</label>
+              <div className="rsvp-stripe" />
+              <div className="text-center mb-8">
+                <p className="eyebrow mb-3">R · S · V · P</p>
+                <h2 className="rsvp-title">Confirma tu Asistencia</h2>
+                <p className="rsvp-sub mt-2">Pase exclusivo para</p>
+                <p className="rsvp-guest">{guest.name}</p>
+              </div>
+              <div className="tickets-pill">Pases disponibles: <strong className="ml-1 text-[#4A5D23]">{guest.ticketsTotal}</strong></div>
+              <form action={async (formData) => { await updateRsvp(formData); }} onSubmit={() => setIsSubmitting(true)} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
+                <input type="hidden" name="id" value={guest.id} />
+                <div className="field-group">
+                  <label className="field-label">¿Cuántos asistirán?</label>
                     <div style={{ position:'relative' }}>
                       <select name="ticketsConfirmed" className="field-select">
                         {[...Array(guest.ticketsTotal)].map((_,i) => (
