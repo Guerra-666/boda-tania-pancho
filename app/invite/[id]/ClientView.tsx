@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-
 import { QRCodeSVG } from 'qrcode.react';
 import { updateRsvp } from '../../../actions/guests';
+
 
 // ── Iconos SVG en Línea
 const HeartIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
@@ -57,7 +57,6 @@ const MOCK_WISHES = [
   { name: "Tus mejores amigos", text: "Que el amor que se tienen hoy siga creciendo infinitamente. ¡A celebrar en grande, nos vemos en la pista!" },
   { name: "Tía Martha", text: "Verlos dar este paso me llena de orgullo y emoción. Que Dios bendiga su matrimonio todos los días de su vida." }
 ];
-
 
 export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: any, messages?: { name: string, text: string }[] }) {
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
@@ -452,18 +451,23 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               </div>
             ) : (
               <div className="rsvp-card no-print">
-              <div className="rsvp-stripe" />
-              <div className="text-center mb-8">
-                <p className="eyebrow mb-3">R · S · V · P</p>
-                <h2 className="rsvp-title">Confirma tu Asistencia</h2>
-                <p className="rsvp-sub mt-2">Pase exclusivo para</p>
-                <p className="rsvp-guest">{guest.name}</p>
-              </div>
-              <div className="tickets-pill">Pases disponibles: <strong className="ml-1 text-[#4A5D23]">{guest.ticketsTotal}</strong></div>
-              <form action={async (formData) => { await updateRsvp(formData); }} onSubmit={() => setIsSubmitting(true)} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
-                <input type="hidden" name="id" value={guest.id} />
-                <div className="field-group">
-                  <label className="field-label">¿Cuántos asistirán?</label>
+                <div className="rsvp-stripe" />
+                <div className="text-center mb-8">
+                  <p className="eyebrow mb-3">R · S · V · P</p>
+                  <h2 className="rsvp-title">Confirma tu Asistencia</h2>
+                  <p className="rsvp-sub mt-2">Pase exclusivo para</p>
+                  <p className="rsvp-guest">{guest.name}</p>
+                </div>
+                <div className="tickets-pill">Pases disponibles: <strong className="ml-1 text-[#4A5D23]">{guest.ticketsTotal}</strong></div>
+
+                {/* ================================================================ */}
+                {/* 🔴 AQUÍ ESTÁ EL CAMBIO PARA ARREGLAR EL ERROR DE VERCEL TYPE ERROR */}
+                {/* ================================================================ */}
+                <form action={async (formData) => { await updateRsvp(formData); }} onSubmit={() => setIsSubmitting(true)} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
+
+                  <input type="hidden" name="id" value={guest.id} />
+                  <div className="field-group">
+                    <label className="field-label">¿Cuántos asistirán?</label>
                     <div style={{ position:'relative' }}>
                       <select name="ticketsConfirmed" className="field-select">
                         {[...Array(guest.ticketsTotal)].map((_,i) => (
