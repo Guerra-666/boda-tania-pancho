@@ -6,8 +6,6 @@ import { ArrowLeft, CheckCircle2, XCircle, AlertTriangle, ScanLine, Loader2, Use
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { validateQrAccess } from '../../actions/guests';
 import Link from 'next/link';
-
-
 export default function ScannerPage() {
   const [result, setResult] = useState<{
     success: boolean;
@@ -66,7 +64,7 @@ export default function ScannerPage() {
               onScan={handleScan}
               allowMultiple={false}
               formats={['qr_code']}
-              components={{ audio: false, finder: false }} // Desactivamos el marco por defecto de la librería
+              components={{ finder: false }}
               styles={{ container: { width: '100%', height: '100%', position: 'absolute', inset: 0 } }}
             />
           )}
