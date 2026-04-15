@@ -45,10 +45,8 @@ const QuoteFilledIcon = ({ size = 24, className = '' }: { size?: number; classNa
 interface Petal { id: number; left: number; delay: number; duration: number; size: number; opacity: number; rotation: number; }
 
 const PHOTOS = [
-  { src: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=900&auto=format&fit=crop", label: "El primer momento", year: "2020" },
-  { src: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=900&auto=format&fit=crop", label: "Nuestra historia", year: "2022" },
-  { src: "https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=900&auto=format&fit=crop", label: "Juntos para siempre", year: "2023" },
-  { src: "https://images.unsplash.com/photo-1532712938730-4e3661514ead?q=80&w=900&auto=format&fit=crop", label: "El compromiso", year: "2025" },
+  { src: "/tania.jpeg", label: "Nuestro primer atardecer", year: "2024" },
+  { src: "/pancho.jpeg", label: "Raíces de nuestro amor", year: "2025" },
 ];
 
 const MOCK_WISHES = [
@@ -66,6 +64,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const [isSubmitting, setIsSubmitting]     = useState(false);
   const [petals, setPetals]                 = useState<Petal[]>([]);
   const [activeSlide, setActiveSlide]       = useState(0);
+  const [heroSlide, setHeroSlide]           = useState(0);
 
   const audioRef   = useRef<HTMLAudioElement>(null);
   const heroRef    = useRef<HTMLDivElement>(null);
@@ -112,10 +111,21 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
   useEffect(() => {
     if (!isEnvelopeOpen) return;
+    const id = setInterval(() => {
+      setHeroSlide(prev => (prev + 1) % PHOTOS.length);
+    }, 5200);
+    return () => clearInterval(id);
+  }, [isEnvelopeOpen]);
+
+  useEffect(() => {
+    if (!isEnvelopeOpen) return;
     if (window.matchMedia('(pointer: coarse)').matches) return;
     const onScroll = () => {
-      const img = heroRef.current?.querySelector('.parallax-img') as HTMLElement | null;
-      if (img) img.style.transform = `translateY(${window.scrollY * 0.3}px) scale(1.15)`;
+      const images = heroRef.current?.querySelectorAll('.hero-bg-slide') as NodeListOf<HTMLElement> | undefined;
+      if (!images) return;
+      images.forEach((img) => {
+        img.style.transform = `translateY(${window.scrollY * 0.3}px) scale(1.15)`;
+      });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -158,7 +168,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
   return (
     <>
-      <audio ref={audioRef} loop src="https://cdn.pixabay.com/audio/2022/01/18/audio_82c219662b.mp3" />
+      <audio ref={audioRef} loop src="/song.mp3" />
 
       {/* Music FAB */}
       <button onClick={toggleAudio} aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
@@ -200,7 +210,15 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
         {/* HERO */}
         <section ref={heroRef} className="relative w-full overflow-hidden no-print" style={{ height: '100dvh' }}>
-          <div className="parallax-img absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform" style={{ backgroundImage:"url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=1400&auto=format&fit=crop')", transform:'scale(1.15)' }} />
+          <div className="hero-bg-layer absolute inset-0">
+            {PHOTOS.map((photo, idx) => (
+              <div
+                key={`hero-${photo.src}-${idx}`}
+                className={`hero-bg-slide absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform ${idx === heroSlide ? 'is-active' : ''}`}
+                style={{ backgroundImage: `url('${photo.src}')`, transform: 'scale(1.15)' }}
+              />
+            ))}
+          </div>
           <div className="absolute inset-0" style={{ background:'linear-gradient(to bottom, rgba(18,15,10,0.2) 0%, rgba(18,15,10,0.5) 50%, #1A1710 100%)' }} />
           {/* Corner frames */}
           {['tl','tr','bl','br'].map(pos => (
@@ -224,7 +242,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               <span className="h-name an-3">Francisco</span>
             </h1>
             <div className="hero-divider an-4" />
-            <p className="hero-date an-5">10 · 10 · 2026</p>
+            <p className="hero-date an-5">10 · OCTUBRE · 2026</p>
           </div>
           {/* Scroll cue */}
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1">
@@ -278,8 +296,14 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               <div className="venue-card">
                 <div className="venue-accent" />
                 <div className="venue-icon">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.9" className="text-[#A8956B]">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-[#A8956B]">
+                    <path d="M12 3v4" />
+                    <path d="M9.5 5h5" />
+                    <path d="M6 10.5l6-4 6 4" />
+                    <path d="M7 10.5V19" />
+                    <path d="M17 10.5V19" />
+                    <path d="M9.5 19v-4.5h5V19" />
+                    <path d="M5 19h14" />
                   </svg>
                 </div>
                 <div className="venue-body">
@@ -291,7 +315,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   <ArrowIcon size={15} />
                 </a>
               </div>
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:36, paddingLeft:28 }}>
+              <div className="venue-connector">
                 <div style={{ width:1, height:12, background:'#E8E4D8' }}/>
                 <div style={{ width:5, height:5, borderRadius:'50%', border:'1px solid #D4B778', background:'#F8F5EE', margin:'0 -1px' }}/>
                 <div style={{ width:1, height:12, background:'#E8E4D8' }}/>
@@ -299,8 +323,13 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               <div className="venue-card">
                 <div className="venue-accent" />
                 <div className="venue-icon">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.9" className="text-[#A8956B]">
-                    <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-[#A8956B]">
+                    <path d="M4 10h16" />
+                    <path d="M6 10V7l6-3 6 3v3" />
+                    <path d="M7 10v8" />
+                    <path d="M17 10v8" />
+                    <path d="M10 18v-3.5a2 2 0 0 1 4 0V18" />
+                    <path d="M5 18h14" />
                   </svg>
                 </div>
                 <div className="venue-body">
@@ -318,7 +347,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           {/* DRESS CODE + GIFTS */}
           <section className="mobile-sec-full sr no-print">
             <div className="dark-card">
-              <div className="dark-card-bg" style={{ backgroundImage:"url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=900&auto=format&fit=crop')" }} />
+              <div className="dark-card-bg" style={{ backgroundImage:"url('/pata.jpeg')" }} />
               <div className="dark-card-overlay" />
               <div className="dark-card-body">
                 <div className="dc-item">
@@ -597,19 +626,22 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .corner-frame { pointer-events:none; }
         .hero-eyebrow-row { display:flex; align-items:center; gap:12px; animation:fade-up 1s .2s both; margin-bottom:20px; }
         .hero-rule { width:24px; height:1px; background:rgba(212,183,120,.4); }
-        .hero-eyebrow { font-family:var(--ff-b); font-size:8px; letter-spacing:.5em; text-transform:uppercase; color:rgba(212,183,120,.7); }
-        .hero-title { font-family:var(--ff-d); font-size:clamp(3.6rem,15vw,7rem); font-weight:300; color:#FDFCF9; line-height:.92; letter-spacing:-.01em; display:flex; flex-direction:column; align-items:center; }
+        .hero-eyebrow { font-family:var(--ff-b); font-size:8px; letter-spacing:.5em; text-transform:uppercase; color:rgba(212,183,120,.75); }
+        .hero-bg-layer { z-index:0; }
+        .hero-bg-slide { opacity:0; transition:opacity 1800ms cubic-bezier(.25,.46,.45,.94), transform 900ms ease-out; }
+        .hero-bg-slide.is-active { opacity:1; }
+        .hero-title { font-family:var(--ff-d); font-size:clamp(3.7rem,15vw,7.1rem); font-weight:300; color:#FDFCF9; line-height:.92; letter-spacing:-.01em; display:flex; flex-direction:column; align-items:center; text-shadow:0 12px 28px rgba(0,0,0,.28); }
         .h-name { display:block; animation:fade-up 1.1s both; opacity:0; }
         .h-amp  { display:block; font-size:clamp(2rem,8.5vw,3.8rem); color:var(--gold-lt); font-style:italic; animation:fade-up 1.1s both; opacity:0; margin:4px 0; }
         .an-1{animation-delay:.1s} .an-2{animation-delay:.3s} .an-3{animation-delay:.5s} .an-4{animation-delay:.7s} .an-5{animation-delay:.9s}
-        .hero-divider { width:1px; height:48px; background:linear-gradient(to bottom,transparent,rgba(212,183,120,.45),transparent); margin:22px auto; animation:fade-up 1s both; opacity:0; }
-        .hero-date { font-family:var(--ff-b); font-size:11px; letter-spacing:.45em; text-transform:uppercase; color:rgba(253,252,249,.65); animation:fade-up 1s both; opacity:0; }
+        .hero-divider { width:1px; height:52px; background:linear-gradient(to bottom,transparent,rgba(212,183,120,.5),transparent); margin:22px auto; animation:fade-up 1s both; opacity:0; }
+        .hero-date { font-family:var(--ff-b); font-size:clamp(12px,3.2vw,15px); letter-spacing:.52em; text-transform:uppercase; color:rgba(253,252,249,.78); animation:fade-up 1s both; opacity:0; text-shadow:0 5px 14px rgba(0,0,0,.26); }
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
         .bounce-anim { animation:bounce 2s ease-in-out infinite; }
 
         /* Content */
         .content-bg { background:var(--cream); width:100%; }
-        .mobile-sec { width:100%; max-width:480px; padding:0 20px; margin-bottom:60px; align-self:center; }
+        .mobile-sec { width:100%; max-width:500px; padding:0 20px; margin-bottom:60px; align-self:center; }
         .mobile-sec-full { width:100%; margin-bottom:60px; }
 
         /* Eyebrow */
@@ -624,7 +656,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .orn-l-dk:last-child { background:linear-gradient(to left,transparent,rgba(212,183,120,.18)); }
 
         /* Quote */
-        .quote-text { font-family:var(--ff-d); font-style:italic; font-size:clamp(1.5rem,5.5vw,2rem); color:var(--olive); line-height:1.55; font-weight:300; }
+        .quote-text { font-family:var(--ff-d); font-style:italic; font-size:clamp(1.5rem,5.5vw,2rem); color:var(--olive); line-height:1.55; font-weight:300; text-wrap:balance; }
 
         /* Parents */
         .parents-grid { display:flex; flex-direction:column; align-items:center; gap:0; }
@@ -634,28 +666,29 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .parent-divider-mobile { width:40px; height:1px; background:var(--stone); margin:4px 0; }
 
         /* Countdown */
-        .countdown-wrap { border-top:1px solid var(--stone); border-bottom:1px solid var(--stone); padding:34px 20px; text-align:center; }
+        .countdown-wrap { border-top:1px solid var(--stone); border-bottom:1px solid var(--stone); padding:38px 20px; text-align:center; background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(248,245,238,.68)); }
         .countdown-grid { display:flex; justify-content:center; gap:clamp(14px,5.5vw,40px); }
         .count-cell { display:flex; flex-direction:column; align-items:center; }
-        .count-num  { font-family:var(--ff-d); font-size:clamp(2.3rem,9vw,4rem); color:var(--olive); font-weight:300; line-height:1; min-width:2ch; text-align:center; }
-        .count-unit { font-size:8px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); margin-top:8px; }
+        .count-num  { font-family:var(--ff-d); font-size:clamp(2.45rem,9.5vw,4.2rem); color:var(--olive); font-weight:300; line-height:1; min-width:2ch; text-align:center; text-shadow:0 7px 18px rgba(74,93,35,.08); }
+        .count-unit { font-size:8px; letter-spacing:.33em; text-transform:uppercase; color:var(--gold); margin-top:8px; }
 
         /* Venues */
-        .venue-card { display:flex; align-items:center; gap:14px; background:white; padding:18px; border:1px solid var(--stone); border-radius:2px; position:relative; overflow:hidden; -webkit-tap-highlight-color:transparent; }
-        .venue-accent { position:absolute; top:0; left:0; bottom:0; width:2px; background:linear-gradient(to bottom,transparent,var(--gold-lt),transparent); opacity:0; transition:opacity .3s; }
+        .venue-card { display:grid; grid-template-columns:44px minmax(0,1fr) 40px; align-items:center; column-gap:12px; background:white; padding:14px 13px; border:1px solid var(--stone); border-radius:3px; position:relative; overflow:hidden; -webkit-tap-highlight-color:transparent; box-shadow:0 10px 26px -18px rgba(0,0,0,.3); }
+        .venue-accent { position:absolute; top:0; left:0; bottom:0; width:2px; background:linear-gradient(to bottom,transparent,var(--gold-lt),transparent); opacity:.35; transition:opacity .3s; }
         .venue-card:active .venue-accent { opacity:1; }
-        .venue-icon { flex-shrink:0; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#F8F5EE; border-radius:50%; }
-        .venue-body { flex:1; min-width:0; }
+        .venue-icon { width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#F8F5EE; border:1px solid #EFE8D9; border-radius:50%; }
+        .venue-body { min-width:0; }
         .venue-type { font-size:8px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); margin-bottom:3px; }
-        .venue-name { font-family:var(--ff-d); color:var(--olive); font-size:1.25rem; font-weight:300; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .venue-time { font-size:11px; color:var(--muted); margin-top:3px; }
-        .venue-cta  { flex-shrink:0; min-width:44px; min-height:44px; width:44px; height:44px; border-radius:50%; background:var(--cream); border:1px solid var(--stone); display:flex; align-items:center; justify-content:center; color:var(--olive); text-decoration:none; -webkit-tap-highlight-color:transparent; }
+        .venue-name { font-family:var(--ff-d); color:var(--olive); font-size:clamp(1.16rem, 4.8vw, 1.32rem); font-weight:300; line-height:1.15; }
+        .venue-time { font-size:11px; color:var(--muted); margin-top:4px; letter-spacing:.08em; }
+        .venue-cta  { width:40px; height:40px; border-radius:50%; background:var(--cream); border:1px solid var(--stone); display:flex; align-items:center; justify-content:center; color:var(--olive); text-decoration:none; -webkit-tap-highlight-color:transparent; box-shadow:0 6px 16px -12px rgba(0,0,0,.35); }
         .venue-cta:active { background:var(--olive); color:white; border-color:var(--olive); }
+        .venue-connector { display:flex; align-items:center; justify-content:flex-start; height:34px; padding-left:21px; }
 
         /* Dark card */
-        .dark-card { position:relative; overflow:hidden; }
+        .dark-card { position:relative; overflow:hidden; border:1px solid rgba(212,183,120,.13); border-radius:4px; box-shadow:0 20px 45px -30px rgba(0,0,0,.5); }
         .dark-card-bg { position:absolute; inset:0; background-size:cover; background-position:center; filter:saturate(0) brightness(.2); }
-        .dark-card-overlay { position:absolute; inset:0; background:linear-gradient(160deg,rgba(22,20,12,.93),rgba(38,52,16,.9)); }
+        .dark-card-overlay { position:absolute; inset:0; background:linear-gradient(160deg,rgba(22,20,12,.88),rgba(38,52,16,.84)); }
         .dark-card-body { position:relative; z-index:10; padding:48px 24px; display:flex; flex-direction:column; gap:36px; }
         .dc-item  { text-align:center; }
         .dc-title { font-family:var(--ff-d); color:#F8F5EE; font-size:1.55rem; font-weight:300; margin-bottom:4px; }
@@ -669,7 +702,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .hide-sb::-webkit-scrollbar { display:none; }
         .hide-sb { -ms-overflow-style:none; scrollbar-width:none; }
         .gallery-slide { min-width:calc(88vw - 16px); max-width:380px; flex-shrink:0; scroll-snap-align:center; }
-        .gallery-frame { position:relative; aspect-ratio:4/5; border-radius:3px; overflow:hidden; background:var(--stone); }
+        .gallery-frame { position:relative; aspect-ratio:4/5; border-radius:3px; overflow:hidden; background:var(--stone); border:1px solid rgba(212,183,120,.28); box-shadow:0 14px 34px -24px rgba(0,0,0,.55); }
         .gallery-img   { width:100%; height:100%; object-fit:cover; display:block; transform:translateZ(0); backface-visibility:hidden; }
         .gallery-caption-bar { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top,rgba(18,15,10,.8) 0%,rgba(18,15,10,.35) 60%,transparent 100%); padding:22px 16px 14px; display:flex; align-items:flex-end; gap:12px; }
         .gcb-num   { font-family:var(--ff-d); font-size:1.9rem; font-weight:300; color:rgba(212,183,120,.5); line-height:1; flex-shrink:0; }
@@ -690,8 +723,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .wish-author { font-family:var(--ff-b); font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold-lt); font-weight:500; }
 
         /* RSVP */
-        .rsvp-card  { background:white; border:1px solid var(--stone); padding:2.5rem 1.4rem; border-radius:2px; position:relative; overflow:hidden; }
-        .rsvp-stripe { position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--olive-dk),var(--gold-lt),var(--olive-dk)); }
+        .rsvp-card  { background:white; border:1px solid var(--stone); padding:2.5rem 1.4rem; border-radius:3px; position:relative; overflow:hidden; box-shadow:0 20px 40px -32px rgba(0,0,0,.45); }
+        .rsvp-stripe { position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--olive-dk),var(--gold-lt),var(--olive-dk)); }
         .rsvp-stripe.confirmed { background:linear-gradient(90deg,var(--olive),#8FBF3A,var(--gold-lt)); }
         .rsvp-title  { font-family:var(--ff-d); font-size:1.9rem; color:var(--olive); font-weight:300; }
         .rsvp-sub    { font-size:11px; color:var(--muted); }
@@ -718,7 +751,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .btn-secondary:disabled { opacity:.6; cursor:wait; }
 
         /* Footer */
-        .invite-footer { background:var(--ink); padding:calc(48px + var(--safe-b)) 24px 48px; text-align:center; display:flex; flex-direction:column; align-items:center; }
+        .invite-footer { background:radial-gradient(120% 100% at 50% 0%, #222019 0%, var(--ink) 65%); padding:calc(48px + var(--safe-b)) 24px 48px; text-align:center; display:flex; flex-direction:column; align-items:center; }
         .footer-names  { font-family:var(--ff-d); font-size:1.4rem; color:var(--gold-lt); font-weight:300; letter-spacing:.08em; margin-top:12px; }
         .footer-year   { font-size:8px; letter-spacing:.5em; text-transform:uppercase; color:rgba(212,183,120,.22); margin-top:6px; }
 
@@ -728,6 +761,11 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
         /* Desktop enhancements */
         @media (min-width:768px) {
+          .hero-date { font-size:15px; }
+          .venue-card { grid-template-columns:46px minmax(0,1fr) 44px; padding:18px 16px; column-gap:14px; }
+          .venue-icon { width:46px; height:46px; }
+          .venue-cta { width:44px; height:44px; }
+          .venue-connector { padding-left:24px; }
           .dark-card-body  { flex-direction:row; gap:0; padding:56px 48px; }
           .dc-sep  { width:1px; height:auto; margin:0 44px; }
           .dc-item { flex:1; }
