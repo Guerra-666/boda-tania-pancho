@@ -221,7 +221,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
             <h1 className="hero-title">
               <span className="h-name an-1">Tania</span>
               <span className="h-amp an-2">&</span>
-              <span className="h-name an-3">Pancho</span>
+              <span className="h-name an-3">Francisco</span>
             </h1>
             <div className="hero-divider an-4" />
             <p className="hero-date an-5">10 · 10 · 2026</p>
@@ -245,15 +245,13 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
             <p className="eyebrow mb-7">Con la bendición de nuestros padres</p>
             <div className="parents-grid">
               <div className="parent-col">
-                <p className="parent-name">Juan Pérez García</p>
-                <div className="parent-dot"/>
-                <p className="parent-name">María López Hernández</p>
+                <p className="parent-name">María de los Angeles Becerril Samperio</p>
               </div>
               <div className="parent-divider-mobile" />
               <div className="parent-col">
-                <p className="parent-name">Carlos Gómez Sánchez</p>
+                <p className="parent-name">Damaceno Quezada Guzmán</p>
                 <div className="parent-dot"/>
-                <p className="parent-name">Elena Ramírez Díaz</p>
+                <p className="parent-name">Praxedis Santillán López</p>
               </div>
             </div>
           </section>
@@ -286,10 +284,10 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                 </div>
                 <div className="venue-body">
                   <p className="venue-type">Ceremonia Religiosa</p>
-                  <p className="venue-name">Parroquia San Miguel</p>
-                  <p className="venue-time">16:00 hrs</p>
+                  <p className="venue-name">Parroquia San Jose</p>
+                  <p className="venue-time">2:00 pm</p>
                 </div>
-                <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
+                <a href="https://maps.app.goo.gl/Z8q1SishVrgxWSAF9?g_st=aw" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
                   <ArrowIcon size={15} />
                 </a>
               </div>
@@ -306,11 +304,11 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   </svg>
                 </div>
                 <div className="venue-body">
-                  <p className="venue-type">Recepción</p>
-                  <p className="venue-name">Finca Blanquita</p>
-                  <p className="venue-time">18:00 hrs</p>
+                  <p className="venue-type">Boda Civil y Recepción</p>
+                  <p className="venue-name">Finca los Arcos</p>
+                  <p className="venue-time">3:30 pm</p>
                 </div>
-                <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
+                <a href="https://maps.app.goo.gl/XEX2knTRz3nnYEy87?g_st=aw" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
                   <ArrowIcon size={15} />
                 </a>
               </div>
@@ -497,6 +495,10 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
             )}
           </section>
         </main>
+
+        <section className="mobile-sec sr no-print text-center">
+          <p className="eyebrow">Por cuestiones de logística tienes hasta 5 de septiembre de 2026 para confirmar tu asistencia.</p>
+        </section>
 
         {/* FOOTER */}
         <footer className="invite-footer no-print">
