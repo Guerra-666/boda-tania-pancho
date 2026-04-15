@@ -65,10 +65,14 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const [petals, setPetals]                 = useState<Petal[]>([]);
   const [activeSlide, setActiveSlide]       = useState(0);
   const [heroSlide, setHeroSlide]           = useState(0);
+  const [ticketsSelection, setTicketsSelection] = useState(1);
+  const [activeRsvpModal, setActiveRsvpModal] = useState<'confirmed' | 'declined' | null>(null);
 
   const audioRef   = useRef<HTMLAudioElement>(null);
   const heroRef    = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
+  const rsvpFormRef = useRef<HTMLFormElement>(null);
+  const statusInputRef = useRef<HTMLInputElement>(null);
 
   // Fallback visual en Canvas
   if (!guest) guest = { id: '000-simulado', name: 'Tania y Pancho', ticketsTotal: 2, status: 'pending' };
@@ -164,6 +168,12 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
     setIsPlaying(p => !p);
   };
 
+  const submitRsvp = (status: 'confirmed' | 'declined') => {
+    if (!statusInputRef.current || !rsvpFormRef.current) return;
+    statusInputRef.current.value = status;
+    rsvpFormRef.current.requestSubmit();
+  };
+
   const unitLabel: Record<string, string> = { days: 'Días', hours: 'Hrs', minutes: 'Min', seconds: 'Seg' };
 
   return (
@@ -178,7 +188,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
       </button>
 
       {/* ══ ENVELOPE ══ */}
-      <div className={`env-screen fixed inset-0 z-50 flex flex-col items-center justify-center px-6 transition-all duration-[1.3s] ease-in-out ${isEnvelopeOpen ? 'opacity-0 -translate-y-6 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
+      <div className={`env-screen fixed inset-0 z-50 flex flex-col items-center justify-center px-6 transition-all duration-[1.6s] ease-[cubic-bezier(.22,.61,.36,1)] ${isEnvelopeOpen ? 'opacity-0 -translate-y-8 scale-[1.02] blur-[2px] pointer-events-none' : 'opacity-100 translate-y-0 scale-100 blur-0'}`}>
         <div className="noise-layer absolute inset-0 pointer-events-none" aria-hidden />
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
           {petals.map(p => (
@@ -186,8 +196,9 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           ))}
         </div>
 
-        <div className={`env-card relative w-full max-w-[290px] transition-transform duration-500 ${sealPopped ? 'scale-[1.04] rotate-1' : 'scale-100'}`}>
+        <div className={`env-card relative w-full max-w-[290px] transition-all duration-700 ease-[cubic-bezier(.22,.61,.36,1)] ${sealPopped ? 'scale-[1.06] -translate-y-1 rotate-[0.8deg]' : 'scale-100 translate-y-0 rotate-0'}`}>
           <div className="env-body relative overflow-hidden" style={{ aspectRatio: '7/5' }}>
+            <div className="env-foil absolute inset-0 pointer-events-none" />
             <div className="env-flap-top" />
             <div className="env-flap-bot" />
             <div className="env-side-l" />
@@ -232,7 +243,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
             </div>
           ))}
           {/* Hero content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
+          <div className="hero-content absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
             <div className="hero-eyebrow-row">
               <div className="hero-rule" /><span className="hero-eyebrow">Nos Casamos</span><div className="hero-rule" />
             </div>
@@ -357,7 +368,12 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   <h3 className="dc-title">Dress Code</h3>
                   <p className="dc-sub">Etiqueta Formal</p>
                   <div className="dc-rule"/>
-                  <p className="dc-body">Se reserva el blanco exclusivamente para la novia.</p>
+                  <p className="dc-body">Por favor no utilizar estos colores para vestimenta: blanco, rojo y verde olivo.</p>
+                  <div className="dc-colors" aria-label="Colores restringidos">
+                    <span className="dc-color-item"><span className="dc-color-dot white" />Blanco</span>
+                    <span className="dc-color-item"><span className="dc-color-dot red" />Rojo</span>
+                    <span className="dc-color-item"><span className="dc-color-dot olive" />Verde olivo</span>
+                  </div>
                 </div>
                 <div className="dc-sep" />
                 <div className="dc-item">
@@ -479,6 +495,9 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
             ) : (
               <div className="rsvp-card no-print">
                 <div className="rsvp-stripe" />
+                <div className="rsvp-deadline">
+                  <strong>Tienes hasta el 5 de septiembre de 2026 para confirmar tu asistencia.</strong>
+                </div>
                 <div className="text-center mb-8">
                   <p className="eyebrow mb-3">R · S · V · P</p>
                   <h2 className="rsvp-title">Confirma tu Asistencia</h2>
@@ -486,23 +505,25 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   <p className="rsvp-guest">{guest.name}</p>
                 </div>
                 <div className="tickets-pill">Pases disponibles: <strong className="ml-1 text-[#4A5D23]">{guest.ticketsTotal}</strong></div>
+                <p className="tickets-note">No hay pases extras. Solo se permitirá el acceso al número de personas confirmadas.</p>
 
                 {/* ================================================================ */}
                 {/* 🔴 AQUÍ ESTÁ EL CAMBIO PARA ARREGLAR EL ERROR DE VERCEL TYPE ERROR */}
                 {/* ================================================================ */}
-                <form action={async (formData) => { await updateRsvp(formData); }} onSubmit={() => setIsSubmitting(true)} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
-
+                <form ref={rsvpFormRef} action={async (formData) => { await updateRsvp(formData); }} onSubmit={() => setIsSubmitting(true)} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
                   <input type="hidden" name="id" value={guest.id} />
+                  <input ref={statusInputRef} type="hidden" name="status" defaultValue="confirmed" />
                   <div className="field-group">
                     <label className="field-label">¿Cuántos asistirán?</label>
                     <div style={{ position:'relative' }}>
-                      <select name="ticketsConfirmed" className="field-select">
+                      <select name="ticketsConfirmed" className="field-select" value={ticketsSelection} onChange={(e) => setTicketsSelection(Number(e.target.value))}>
                         {[...Array(guest.ticketsTotal)].map((_,i) => (
                           <option key={i+1} value={i+1}>{i+1} {i===0?'Persona':'Personas'}</option>
                         ))}
                       </select>
                       <div className="field-arrow"><ChevronDownIcon size={14}/></div>
                     </div>
+                    <p className="confirm-preview">Confirmar asistencia para: <strong>{ticketsSelection} {ticketsSelection === 1 ? 'persona' : 'personas'}</strong></p>
                   </div>
                   <div className="field-group">
                     <label className="field-label" style={{ display:'flex', alignItems:'center', gap:8 }}>
@@ -512,28 +533,68 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                     <p className="field-hint">Máx. 250 caracteres</p>
                   </div>
                   <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem', paddingTop:'0.5rem' }}>
-                    <button type="submit" name="status" value="confirmed" disabled={isSubmitting} className="btn-primary">
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      className="btn-primary"
+                      onClick={() => setActiveRsvpModal('confirmed')}
+                    >
                       {isSubmitting ? 'Procesando…' : '¡Sí, Asistiré!'}
                     </button>
-                    <button type="submit" name="status" value="declined" disabled={isSubmitting} className="btn-secondary">
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      className="btn-secondary"
+                      onClick={() => setActiveRsvpModal('declined')}
+                    >
                       No podré asistir
                     </button>
                   </div>
                 </form>
+                {activeRsvpModal && (
+                  <div className="confirm-modal-backdrop" onClick={() => setActiveRsvpModal(null)} role="dialog" aria-modal="true" aria-label="Confirmar respuesta">
+                    <div className="confirm-modal-card" onClick={(e) => e.stopPropagation()}>
+                      {activeRsvpModal === 'confirmed' ? (
+                        <>
+                          <p className="confirm-modal-title">Confirmar asistencia</p>
+                          <p className="confirm-modal-copy">¿Confirmar asistencia para <strong>{ticketsSelection} {ticketsSelection === 1 ? 'persona' : 'personas'}</strong>?</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="confirm-modal-title">Confirmar inasistencia</p>
+                          <p className="confirm-modal-copy">¿Seguro que no podrán asistir?</p>
+                          <p className="confirm-modal-copy">Agradecemos mucho que nos avisen con anticipación. Les mandamos un abrazo y gracias por su cariño.</p>
+                        </>
+                      )}
+                      <div className="confirm-modal-actions">
+                        <button type="button" className="confirm-modal-btn secondary" onClick={() => setActiveRsvpModal(null)}>Editar</button>
+                        <button
+                          type="button"
+                          className="confirm-modal-btn primary"
+                          onClick={() => {
+                            const status = activeRsvpModal === 'confirmed' ? 'confirmed' : 'declined';
+                            setActiveRsvpModal(null);
+                            submitRsvp(status);
+                          }}
+                        >
+                          {activeRsvpModal === 'confirmed' ? 'Confirmar' : 'Sí, no asistiremos'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </section>
         </main>
 
-        <section className="mobile-sec sr no-print text-center">
-          <p className="eyebrow">Por cuestiones de logística tienes hasta 5 de septiembre de 2026 para confirmar tu asistencia.</p>
-        </section>
 
         {/* FOOTER */}
         <footer className="invite-footer no-print">
           <div className="orn-row mb-5"><div className="orn-l-dk"/><HeartIcon size={10} className="text-[rgba(212,183,120,0.35)]"/><div className="orn-l-dk"/></div>
-          <p className="footer-names">Tania & Pancho</p>
+          <p className="footer-names">Tania & Francisco</p>
           <p className="footer-year">2026</p>
+          <p className="footer-credit">Made with love by Familia Guerra Guzman</p>
         </footer>
       </div>
 
@@ -597,18 +658,23 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .petal { border-radius:50% 0 50% 0; background:radial-gradient(ellipse at 40% 30%, rgba(212,183,120,.5), rgba(168,149,107,.12)); animation:petal-drift linear infinite; }
 
         /* Envelope */
-        .env-screen { background:radial-gradient(ellipse at 50% 25%, #3D5120 0%, #1E2B10 55%, #131808 100%); font-family:var(--ff-b); }
-        .env-body { background:#FDFCF9; border-radius:2px; border:1px solid rgba(212,183,120,.12); box-shadow:0 32px 80px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.3); }
-        .env-flap-top { position:absolute; top:0; left:0; width:100%; height:52%; clip-path:polygon(0 0,100% 0,50% 100%); background:linear-gradient(160deg,#F9F8F3,#EAE5D5); border-bottom:1px solid #E0D8C0; }
-        .env-flap-bot { position:absolute; bottom:0; left:0; width:100%; height:52%; clip-path:polygon(0 100%,50% 0,100% 100%); background:linear-gradient(180deg,#EAE5D5,#DDD7C5); }
+        .env-screen { background:radial-gradient(ellipse at 50% 22%, #4A5F28 0%, #233114 52%, #121707 100%); font-family:var(--ff-b); }
+        .env-screen::before { content:''; position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at 50% 38%, rgba(212,183,120,.16), transparent 58%); }
+        @keyframes env-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-4px); } }
+        .env-card { animation:env-float 6s ease-in-out infinite; }
+        .env-body { background:linear-gradient(180deg,#FEFDFB,#EFE9DB); border-radius:2px; border:1px solid rgba(212,183,120,.2); box-shadow:0 42px 92px rgba(0,0,0,.5),0 12px 30px rgba(0,0,0,.34); }
+        .env-foil { background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.32) 32%, transparent 55%, rgba(212,183,120,.12) 72%, transparent 100%); mix-blend-mode:screen; opacity:.55; }
+        .env-flap-top { position:absolute; top:0; left:0; width:100%; height:52%; clip-path:polygon(0 0,100% 0,50% 100%); background:linear-gradient(160deg,#FBFAF6,#E8DFC9); border-bottom:1px solid rgba(197,170,112,.45); box-shadow:inset 0 -20px 30px rgba(168,149,107,.12); }
+        .env-flap-bot { position:absolute; bottom:0; left:0; width:100%; height:52%; clip-path:polygon(0 100%,50% 0,100% 100%); background:linear-gradient(180deg,#EDE5D3,#DCD1BC); }
         .env-side-l  { position:absolute; top:0; left:0; width:50%; height:100%; clip-path:polygon(0 0,0 100%,100% 50%); background:linear-gradient(90deg,#E8E2D0,#F0EBD8); opacity:.6; }
         .env-side-r  { position:absolute; top:0; right:0; width:50%; height:100%; clip-path:polygon(100% 0,100% 100%,0 50%); background:linear-gradient(-90deg,#E0D9C6,#EEEADC); opacity:.6; }
-        .wax-seal { background:radial-gradient(circle at 35% 35%,#9B7340,#4A3018); box-shadow:0 4px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12); border:none; cursor:pointer; transition:transform .35s,opacity .35s; }
+        @keyframes seal-breathe { 0%,100%{ box-shadow:0 8px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12),0 0 0 0 rgba(212,183,120,.24); } 50%{ box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 10px rgba(212,183,120,0); } }
+        .wax-seal { background:radial-gradient(circle at 35% 35%,#B1834B,#5A391E); box-shadow:0 8px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12); border:1px solid rgba(212,183,120,.22); cursor:pointer; transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .35s; animation:seal-breathe 3.2s ease-in-out infinite; }
         .wax-seal:active { transform:translate(-50%,-50%) scale(.94) !important; }
         .env-tag  { font-family:var(--ff-b); font-size:9px; letter-spacing:.4em; text-transform:uppercase; color:rgba(212,183,120,.55); }
-        .env-name { font-family:var(--ff-d); font-size:1.8rem; font-weight:300; color:var(--gold-lt); }
-        .env-open-btn { display:block; padding:15px 24px; background:transparent; border:1px solid rgba(212,183,120,.4); color:var(--gold-lt); font-family:var(--ff-b); font-size:10px; letter-spacing:.3em; text-transform:uppercase; font-weight:500; cursor:pointer; border-radius:1px; min-height:52px; -webkit-tap-highlight-color:transparent; }
-        .env-open-btn:active { background:rgba(212,183,120,.1); border-color:var(--gold-lt); }
+        .env-name { font-family:var(--ff-d); font-size:1.86rem; font-weight:300; color:var(--gold-lt); text-shadow:0 6px 18px rgba(0,0,0,.32); }
+        .env-open-btn { display:block; padding:15px 24px; background:linear-gradient(180deg,rgba(212,183,120,.06),rgba(212,183,120,.02)); border:1px solid rgba(212,183,120,.46); color:var(--gold-lt); font-family:var(--ff-b); font-size:10px; letter-spacing:.3em; text-transform:uppercase; font-weight:500; cursor:pointer; border-radius:1px; min-height:52px; -webkit-tap-highlight-color:transparent; box-shadow:0 14px 24px -20px rgba(0,0,0,.7); transition:all .35s cubic-bezier(.22,.61,.36,1); }
+        .env-open-btn:active { background:rgba(212,183,120,.14); border-color:var(--gold-lt); transform:translateY(1px); }
         .env-hint { font-family:var(--ff-b); font-size:9px; color:rgba(212,183,120,.28); letter-spacing:.2em; text-transform:uppercase; }
 
         /* Music FAB */
@@ -630,6 +696,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .hero-bg-layer { z-index:0; }
         .hero-bg-slide { opacity:0; transition:opacity 1800ms cubic-bezier(.25,.46,.45,.94), transform 900ms ease-out; }
         .hero-bg-slide.is-active { opacity:1; }
+        .hero-content { justify-content:flex-start; padding-top:clamp(76px, 12vh, 120px); }
         .hero-title { font-family:var(--ff-d); font-size:clamp(3.7rem,15vw,7.1rem); font-weight:300; color:#FDFCF9; line-height:.92; letter-spacing:-.01em; display:flex; flex-direction:column; align-items:center; text-shadow:0 12px 28px rgba(0,0,0,.28); }
         .h-name { display:block; animation:fade-up 1.1s both; opacity:0; }
         .h-amp  { display:block; font-size:clamp(2rem,8.5vw,3.8rem); color:var(--gold-lt); font-style:italic; animation:fade-up 1.1s both; opacity:0; margin:4px 0; }
@@ -688,13 +755,19 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         /* Dark card */
         .dark-card { position:relative; overflow:hidden; border:1px solid rgba(212,183,120,.13); border-radius:4px; box-shadow:0 20px 45px -30px rgba(0,0,0,.5); }
         .dark-card-bg { position:absolute; inset:0; background-size:cover; background-position:center; filter:saturate(0) brightness(.2); }
-        .dark-card-overlay { position:absolute; inset:0; background:linear-gradient(160deg,rgba(22,20,12,.88),rgba(38,52,16,.84)); }
+        .dark-card-overlay { position:absolute; inset:0; background:linear-gradient(160deg,rgba(22,20,12,.82),rgba(38,52,16,.78)); }
         .dark-card-body { position:relative; z-index:10; padding:48px 24px; display:flex; flex-direction:column; gap:36px; }
         .dc-item  { text-align:center; }
         .dc-title { font-family:var(--ff-d); color:#F8F5EE; font-size:1.55rem; font-weight:300; margin-bottom:4px; }
         .dc-sub   { font-size:8px; letter-spacing:.4em; text-transform:uppercase; color:rgba(212,183,120,.5); margin-bottom:14px; }
         .dc-rule  { width:26px; height:1px; background:rgba(212,183,120,.25); margin:0 auto 14px; }
         .dc-body  { font-size:13px; line-height:1.75; color:rgba(212,183,120,.45); font-weight:300; }
+        .dc-colors { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:10px; }
+        .dc-color-item { display:inline-flex; align-items:center; gap:6px; font-size:10px; letter-spacing:.08em; color:rgba(248,245,238,.86); text-transform:uppercase; }
+        .dc-color-dot { width:10px; height:10px; border-radius:50%; border:1px solid rgba(255,255,255,.45); display:inline-block; }
+        .dc-color-dot.white { background:#FFFFFF; }
+        .dc-color-dot.red { background:#AF1E2D; }
+        .dc-color-dot.olive { background:#4A5D23; }
         .dc-sep   { width:56px; height:1px; background:rgba(255,255,255,.06); margin:0 auto; }
 
         /* Gallery */
@@ -729,7 +802,11 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .rsvp-title  { font-family:var(--ff-d); font-size:1.9rem; color:var(--olive); font-weight:300; }
         .rsvp-sub    { font-size:11px; color:var(--muted); }
         .rsvp-guest  { font-family:var(--ff-d); font-size:1.45rem; color:var(--olive); font-style:italic; margin-top:4px; word-break:break-word; }
+        .rsvp-deadline { margin:4px 0 18px; padding:10px 12px; background:linear-gradient(180deg,#F9F7F1,#F4F0E6); border:1px solid #E7E0D1; border-radius:2px; font-size:11px; color:#655C4B; line-height:1.55; text-align:center; }
+        .rsvp-deadline strong { color:#4A5D23; font-weight:600; }
         .tickets-pill { background:var(--cream); border:1px solid var(--stone); padding:12px 16px; text-align:center; border-radius:2px; font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
+        .tickets-note { margin-top:10px; font-size:11px; line-height:1.55; color:#7A705F; text-align:center; }
+        .confirm-preview { margin-top:8px; font-size:12px; color:#6C644F; background:var(--cream); border:1px solid var(--stone); padding:9px 10px; border-radius:2px; text-align:center; }
         .qr-frame { display:inline-block; background:white; padding:14px; border:1px solid var(--stone); }
         .qr-hint  { font-size:11px; color:var(--muted); line-height:1.6; max-width:230px; margin:0 auto; }
         /* Fields */
@@ -749,11 +826,20 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .btn-secondary{ width:100%; min-height:50px; padding:14px 24px; background:transparent; color:var(--muted); border:1px solid var(--stone); border-radius:1px; font-family:var(--ff-b); font-size:10px; letter-spacing:.25em; text-transform:uppercase; cursor:pointer; transition:all .25s; -webkit-tap-highlight-color:transparent; }
         .btn-secondary:active:not(:disabled) { color:var(--olive); background:var(--stone); }
         .btn-secondary:disabled { opacity:.6; cursor:wait; }
+        .confirm-modal-backdrop { position:fixed; inset:0; z-index:80; background:rgba(15,13,10,.66); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); display:flex; align-items:flex-end; justify-content:center; padding:18px 14px calc(22px + var(--safe-b)); }
+        .confirm-modal-card { width:min(100%, 420px); background:#FDFCF9; border:1px solid var(--stone); box-shadow:0 30px 50px -30px rgba(0,0,0,.55); border-radius:4px; padding:22px 16px 16px; }
+        .confirm-modal-title { font-family:var(--ff-d); font-size:1.7rem; color:var(--olive); text-align:center; font-weight:300; }
+        .confirm-modal-copy { margin-top:10px; color:#6C644F; font-size:14px; line-height:1.6; text-align:center; }
+        .confirm-modal-actions { display:flex; gap:10px; margin-top:18px; }
+        .confirm-modal-btn { flex:1; min-height:46px; border-radius:2px; font-family:var(--ff-b); font-size:10px; letter-spacing:.22em; text-transform:uppercase; }
+        .confirm-modal-btn.secondary { border:1px solid var(--stone); background:white; color:var(--muted); }
+        .confirm-modal-btn.primary { border:1px solid var(--olive); background:var(--olive); color:white; }
 
         /* Footer */
         .invite-footer { background:radial-gradient(120% 100% at 50% 0%, #222019 0%, var(--ink) 65%); padding:calc(48px + var(--safe-b)) 24px 48px; text-align:center; display:flex; flex-direction:column; align-items:center; }
         .footer-names  { font-family:var(--ff-d); font-size:1.4rem; color:var(--gold-lt); font-weight:300; letter-spacing:.08em; margin-top:12px; }
         .footer-year   { font-size:8px; letter-spacing:.5em; text-transform:uppercase; color:rgba(212,183,120,.22); margin-top:6px; }
+        .footer-credit { font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:rgba(212,183,120,.4); margin-top:14px; }
 
         /* Scroll reveal */
         .sr { opacity:0; transform:translateY(32px); transition:opacity 1s cubic-bezier(.25,.46,.45,.94),transform 1s cubic-bezier(.25,.46,.45,.94); }
@@ -761,6 +847,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
         /* Desktop enhancements */
         @media (min-width:768px) {
+          .hero-content { justify-content:center; padding-top:0; }
           .hero-date { font-size:15px; }
           .venue-card { grid-template-columns:46px minmax(0,1fr) 44px; padding:18px 16px; column-gap:14px; }
           .venue-icon { width:46px; height:46px; }
@@ -779,6 +866,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           .corner-frame { width:28px; height:28px; }
           .wishes-track { padding:0 48px; gap:24px; justify-content: flex-start; }
           .wish-card { min-width:360px; padding:56px 40px; }
+          .confirm-modal-backdrop { align-items:center; padding:24px; }
+          .confirm-modal-card { padding:26px 22px 20px; }
         }
       `}</style>
     </>
