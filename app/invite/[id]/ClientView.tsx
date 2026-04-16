@@ -90,7 +90,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const statusInputRef = useRef<HTMLInputElement>(null);
 
   // Fallback visual en Canvas
-  if (!guest) guest = { id: '000-simulado', name: 'Tania y Pancho', ticketsTotal: 2, status: 'pending' };
+  if (!guest) guest = { id: '000-simulado', name: 'Tania y Francisco', ticketsTotal: 2, status: 'pending' };
 
   const isConfirmed = guest.status === 'confirmed';
   const isDeclined  = guest.status === 'declined';

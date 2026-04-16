@@ -75,7 +75,7 @@ export default function HomePage() {
 
       {/* ── PIE DE PÁGINA Y ACCESO SECRETO ADMIN ── */}
       <footer className="relative z-20 pb-8 pt-4 flex flex-col items-center justify-center opacity-50 hover:opacity-100 transition-opacity">
-        <p className="text-[9px] uppercase tracking-[0.3em] text-white/50 mb-3">Tania & Pancho © 2026</p>
+        <p className="text-[9px] uppercase tracking-[0.3em] text-white/50 mb-3">Tania & Francisco © 2026</p>
 
         {/* Candado secreto para ir al login (Solo ustedes sabrán que está ahí) */}
         <Link href="/login" className="p-2 text-white/30 hover:text-[#D4B778] transition-colors" title="Acceso a Organizadores">
