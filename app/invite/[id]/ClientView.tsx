@@ -219,7 +219,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
             <div className="env-side-l" />
             <div className="env-side-r" />
             <button onClick={handleOpenEnvelope} className={`wax-seal absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-[64px] h-[64px] rounded-full flex items-center justify-center transition-all duration-400 ${sealPopped ? 'scale-[1.5] opacity-0 rotate-[20deg]' : 'scale-100 opacity-100'}`} aria-label="Abrir invitación">
-              <span className="font-serif italic text-[#FDFCF9] text-xl select-none">T&P</span>
+              <span className="font-serif italic text-[#FDFCF9] text-xl select-none">T&F</span>
             </button>
           </div>
           <div className="mt-8 text-center flex flex-col items-center">
@@ -245,7 +245,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               />
             ))}
           </div>
-          <div className="absolute inset-0" style={{ background:'linear-gradient(to bottom, rgba(18,15,10,0.2) 0%, rgba(18,15,10,0.5) 50%, #1A1710 100%)' }} />
+          <div className="hero-overlay absolute inset-0" />
+          <div className="hero-vignette absolute inset-0" />
           {/* Corner frames */}
           {['tl','tr','bl','br'].map(pos => (
             <div key={pos} className={`corner-frame absolute z-10 w-6 h-6 ${pos==='tl'?'top-4 left-4':pos==='tr'?'top-4 right-4':pos==='bl'?'bottom-4 left-4':'bottom-4 right-4'}`}>
@@ -268,16 +269,16 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               <span className="h-name an-3">Francisco</span>
             </h1>
             <div className="hero-divider an-4" />
-            <p className="hero-date an-5">10 - 10 - 2026</p>
+            <p className="hero-date an-5">10 · 10 · 26</p>
 
             {/* Cuenta Regresiva en Hero */}
-            <div className="hero-countdown an-6 mt-8">
-              <p className="text-[9px] uppercase tracking-[0.35em] text-[rgba(212,183,120,0.8)] mb-4 text-center">Faltan para el gran día</p>
-              <div className="flex gap-5 sm:gap-8 justify-center">
+            <div className="hero-countdown an-6">
+              <p className="hero-countdown-label">Faltan para el gran día</p>
+              <div className="hero-countdown-grid">
                 {Object.entries(timeLeft).map(([u, v]) => (
-                  <div key={u} className="flex flex-col items-center min-w-[3.5rem]">
-                    <div className="text-3xl sm:text-4xl font-serif text-[#FDFCF9] font-light leading-none tracking-wider" style={{ textShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>{String(v).padStart(2,'0')}</div>
-                    <div className="text-[8px] sm:text-[9px] tracking-[0.2em] uppercase text-[#D4B778] mt-2">{unitLabel[u]}</div>
+                  <div key={u} className="hero-count-cell">
+                    <div className="hero-count-num">{String(v).padStart(2,'0')}</div>
+                    <div className="hero-count-unit">{unitLabel[u]}</div>
                   </div>
                 ))}
               </div>
@@ -399,30 +400,39 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
           {/* GALLERY */}
           <section className="mobile-sec-full sr no-print">
-            <p className="eyebrow mb-6 px-5 text-center">Nuestra Historia</p>
-            <div ref={galleryRef} className="gallery-track hide-sb">
-              {PHOTOS.map((photo, idx) => (
-                <div key={idx} className="gallery-slide">
-                  <div className="gallery-frame">
-                    <img src={photo.src} alt={photo.label} className="gallery-img" loading="lazy" draggable={false} />
-                    <div className="gallery-caption-bar">
-                      <p className="gcb-num">{String(idx+1).padStart(2,'0')}</p>
-                      <div className="gcb-sep"/>
-                      <div>
-                        <p className="gcb-label">{photo.label}</p>
-                        <p className="gcb-year">{photo.year}</p>
+            <div className="gallery-head px-5">
+              <p className="eyebrow">Nuestra Historia</p>
+              <p className="gallery-title">Capítulos de nuestro amor</p>
+              <p className="gallery-subtitle">Desliza y revive cada recuerdo especial</p>
+            </div>
+            <div className="gallery-shell">
+              <div ref={galleryRef} className="gallery-track hide-sb">
+                {PHOTOS.map((photo, idx) => (
+                  <div key={idx} className={`gallery-slide ${idx===activeSlide ? 'is-active' : ''}`}>
+                    <div className="gallery-frame">
+                      <img src={photo.src} alt={photo.label} className="gallery-img" loading="lazy" draggable={false} />
+                      <div className="gallery-caption-bar">
+                        <p className="gcb-num">{String(idx+1).padStart(2,'0')}</p>
+                        <div className="gcb-sep"/>
+                        <div>
+                          <p className="gcb-label">{photo.label}</p>
+                          <p className="gcb-year">{photo.year}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-            <div className="gallery-dots">
-              {PHOTOS.map((_,idx) => (
-                <button key={idx} onClick={() => scrollToSlide(idx)} className={`gallery-dot ${idx===activeSlide?'active':''}`} aria-label={`Foto ${idx+1}`} />
-              ))}
+            <div className="gallery-dots-wrap">
+              <div className="gallery-dots-line" />
+              <div className="gallery-dots">
+                {PHOTOS.map((_,idx) => (
+                  <button key={idx} onClick={() => scrollToSlide(idx)} className={`gallery-dot ${idx===activeSlide?'active':''}`} aria-label={`Foto ${idx+1}`} />
+                ))}
+              </div>
             </div>
-            <p className="swipe-hint">Desliza para ver más</p>
+            <p className="swipe-hint gallery-swipe-hint">Desliza para ver más</p>
           </section>
 
           {/* ══ MURO DE LOS DESEOS (GUESTBOOK) ══ */}
@@ -697,20 +707,27 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         /* Hero */
         @keyframes fade-up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
         .corner-frame { pointer-events:none; }
-        .hero-eyebrow-row { display:flex; align-items:center; gap:16px; animation:fade-up 1s .2s both; margin-bottom:24px; }
-        .hero-rule { width:32px; height:1px; background:rgba(212,183,120,.8); }
-        .hero-eyebrow { font-family:var(--ff-b); font-size:14px; letter-spacing:.4em; text-transform:uppercase; color:#D4B778; font-weight:500; text-shadow:0 2px 4px rgba(0,0,0,0.5); }
+        .hero-overlay { background:linear-gradient(to bottom, rgba(18,15,10,0.06) 0%, rgba(18,15,10,0.45) 52%, #1A1710 100%); }
+        .hero-vignette { background:radial-gradient(ellipse at 50% 38%, rgba(255,255,255,.05) 0%, rgba(18,15,10,.2) 54%, rgba(18,15,10,.48) 100%); }
+        .hero-eyebrow-row { display:flex; align-items:center; justify-content:center; gap:12px; animation:fade-up 1s .2s both; margin-bottom:20px; }
+        .hero-rule { width:26px; height:1px; background:rgba(212,183,120,.62); }
+        .hero-eyebrow { font-family:var(--ff-b); font-size:clamp(9px,2.4vw,11px); letter-spacing:.44em; text-transform:uppercase; color:#D4B778; font-weight:500; text-shadow:0 2px 4px rgba(0,0,0,0.5); }
         .hero-bg-layer { z-index:0; }
         .hero-bg-slide { opacity:0; transition:opacity 1800ms cubic-bezier(.25,.46,.45,.94), transform 900ms ease-out; }
         .hero-bg-slide.is-active { opacity:1; }
-        .hero-content { justify-content:flex-start; padding-top:clamp(76px, 12vh, 120px); }
-        .hero-title { font-family:var(--ff-d); font-size:clamp(3.7rem,15vw,7.1rem); font-weight:300; color:#FDFCF9; line-height:.92; letter-spacing:-.01em; display:flex; flex-direction:column; align-items:center; text-shadow:0 12px 28px rgba(0,0,0,.28); }
+        .hero-content { justify-content:center; padding-top:0; }
+        .hero-title { font-family:var(--ff-d); font-size:clamp(3.2rem,14vw,6.6rem); font-weight:300; color:#FDFCF9; line-height:.92; letter-spacing:-.01em; display:flex; flex-direction:column; align-items:center; text-shadow:0 12px 28px rgba(0,0,0,.32); }
         .h-name { display:block; animation:fade-up 1.1s both; opacity:0; }
         .h-amp  { display:block; font-size:clamp(2rem,8.5vw,3.8rem); color:var(--gold-lt); font-style:italic; animation:fade-up 1.1s both; opacity:0; margin:4px 0; }
         .an-1{animation-delay:.1s} .an-2{animation-delay:.3s} .an-3{animation-delay:.5s} .an-4{animation-delay:.7s} .an-5{animation-delay:.9s} .an-6{animation-delay:1.1s}
-        .hero-divider { width:1px; height:52px; background:linear-gradient(to bottom,transparent,rgba(212,183,120,.5),transparent); margin:22px auto; animation:fade-up 1s both; opacity:0; }
-        .hero-date { font-family:var(--ff-b); font-size:clamp(14px,4vw,18px); letter-spacing:.4em; text-transform:uppercase; color:rgba(253,252,249,.9); font-weight: 500; animation:fade-up 1s both; opacity:0; text-shadow:0 5px 14px rgba(0,0,0,.4); }
-        .hero-countdown { animation:fade-up 1s both; opacity:0; }
+        .hero-divider { width:1px; height:40px; background:linear-gradient(to bottom,transparent,rgba(212,183,120,.48),transparent); margin:16px auto; animation:fade-up 1s both; opacity:0; }
+        .hero-date { display:inline-block; font-family:var(--ff-b); font-size:clamp(11px,3.6vw,14px); letter-spacing:.42em; text-transform:uppercase; color:rgba(253,252,249,.94); font-weight:500; animation:fade-up 1s both; opacity:0; text-shadow:0 5px 14px rgba(0,0,0,.4); padding:8px 10px 8px 14px; border:1px solid rgba(212,183,120,.42); border-radius:2px; background:rgba(212,183,120,.08); }
+        .hero-countdown { animation:fade-up 1s both; opacity:0; margin-top:16px; }
+        .hero-countdown-label { font-size:8px; letter-spacing:.34em; text-transform:uppercase; color:rgba(212,183,120,.86); margin-bottom:10px; text-align:center; }
+        .hero-countdown-grid { display:flex; gap:14px; justify-content:center; }
+        .hero-count-cell { display:flex; flex-direction:column; align-items:center; min-width:50px; }
+        .hero-count-num { font-family:var(--ff-d); font-size:clamp(1.9rem,8vw,2.4rem); color:#FDFCF9; font-weight:300; line-height:1; text-shadow:0 4px 12px rgba(0,0,0,.3); }
+        .hero-count-unit { font-size:8px; letter-spacing:.18em; text-transform:uppercase; color:#D4B778; margin-top:4px; }
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
         .bounce-anim { animation:bounce 2s ease-in-out infinite; }
 
@@ -766,21 +783,34 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .dc-sep   { width:56px; height:1px; background:rgba(255,255,255,.06); margin:0 auto; }
 
         /* Gallery */
-        .gallery-track { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; gap:10px; padding:0 16px; }
+        .gallery-head { text-align:center; margin-bottom:22px; }
+        .gallery-title { font-family:var(--ff-d); color:var(--olive); font-size:clamp(1.8rem,7vw,2.5rem); font-weight:300; line-height:1.08; margin-top:10px; }
+        .gallery-subtitle { margin-top:8px; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(138,130,117,.9); }
+        .gallery-shell { position:relative; }
+        .gallery-shell::before, .gallery-shell::after { content:''; position:absolute; top:0; bottom:0; width:20px; pointer-events:none; z-index:2; }
+        .gallery-shell::before { left:0; background:linear-gradient(to right, #F8F5EE 0%, rgba(248,245,238,0) 100%); }
+        .gallery-shell::after { right:0; background:linear-gradient(to left, #F8F5EE 0%, rgba(248,245,238,0) 100%); }
+        .gallery-track { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; gap:14px; padding:0 16px; }
         .hide-sb::-webkit-scrollbar { display:none; }
         .hide-sb { -ms-overflow-style:none; scrollbar-width:none; }
-        .gallery-slide { min-width:calc(88vw - 16px); max-width:380px; flex-shrink:0; scroll-snap-align:center; }
-        .gallery-frame { position:relative; aspect-ratio:4/5; border-radius:3px; overflow:hidden; background:var(--stone); border:1px solid rgba(212,183,120,.28); box-shadow:0 14px 34px -24px rgba(0,0,0,.55); }
-        .gallery-img   { width:100%; height:100%; object-fit:cover; display:block; transform:translateZ(0); backface-visibility:hidden; }
-        .gallery-caption-bar { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top,rgba(18,15,10,.8) 0%,rgba(18,15,10,.35) 60%,transparent 100%); padding:22px 16px 14px; display:flex; align-items:flex-end; gap:12px; }
-        .gcb-num   { font-family:var(--ff-d); font-size:1.9rem; font-weight:300; color:rgba(212,183,120,.5); line-height:1; flex-shrink:0; }
-        .gcb-sep   { width:1px; height:26px; background:rgba(255,255,255,.2); flex-shrink:0; }
-        .gcb-label { font-family:var(--ff-d); font-style:italic; font-size:.95rem; color:rgba(253,252,249,.92); font-weight:300; line-height:1.2; }
-        .gcb-year  { font-size:8px; letter-spacing:.3em; color:rgba(212,183,120,.5); text-transform:uppercase; margin-top:3px; }
-        .gallery-dots { display:flex; justify-content:center; gap:8px; margin-top:18px; padding:0 16px; }
-        .gallery-dot  { width:18px; height:4px; border-radius:2px; background:var(--stone); border:none; cursor:pointer; padding:0; transition:background .3s,width .3s; position:relative; -webkit-tap-highlight-color:transparent; }
+        .gallery-slide { min-width:calc(88vw - 16px); max-width:380px; flex-shrink:0; scroll-snap-align:center; opacity:.65; transform:scale(.965); transition:transform .4s ease, opacity .4s ease; }
+        .gallery-slide.is-active { opacity:1; transform:scale(1); }
+        .gallery-frame { position:relative; aspect-ratio:4/5; border-radius:6px; overflow:hidden; background:var(--stone); border:1px solid rgba(212,183,120,.35); box-shadow:0 24px 44px -28px rgba(0,0,0,.5); }
+        .gallery-frame::before { content:''; position:absolute; inset:8px; border:1px solid rgba(253,252,249,.24); border-radius:4px; pointer-events:none; z-index:2; }
+        .gallery-img   { width:100%; height:100%; object-fit:cover; display:block; transform:translateZ(0) scale(1.03); backface-visibility:hidden; transition:transform 1.2s ease; }
+        .gallery-slide.is-active .gallery-img { transform:translateZ(0) scale(1.08); }
+        .gallery-caption-bar { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top,rgba(18,15,10,.85) 0%,rgba(18,15,10,.42) 62%,transparent 100%); padding:24px 18px 16px; display:flex; align-items:flex-end; gap:12px; z-index:3; }
+        .gcb-num   { font-family:var(--ff-d); font-size:2rem; font-weight:300; color:rgba(212,183,120,.65); line-height:1; flex-shrink:0; }
+        .gcb-sep   { width:1px; height:28px; background:rgba(255,255,255,.3); flex-shrink:0; }
+        .gcb-label { font-family:var(--ff-d); font-style:italic; font-size:1.06rem; color:rgba(253,252,249,.96); font-weight:300; line-height:1.2; }
+        .gcb-year  { font-size:8px; letter-spacing:.34em; color:rgba(212,183,120,.68); text-transform:uppercase; margin-top:4px; }
+        .gallery-dots-wrap { position:relative; margin-top:18px; padding:0 16px; }
+        .gallery-dots-line { width:100%; max-width:180px; height:1px; margin:0 auto; background:linear-gradient(to right, transparent, rgba(212,183,120,.36), transparent); }
+        .gallery-dots { display:flex; justify-content:center; gap:10px; margin-top:-6px; }
+        .gallery-dot  { width:10px; height:10px; border-radius:50%; background:#DDD7C8; border:1px solid rgba(212,183,120,.45); cursor:pointer; padding:0; transition:background .3s, transform .3s, box-shadow .3s; position:relative; -webkit-tap-highlight-color:transparent; }
         .gallery-dot::before { content:''; position:absolute; inset:-10px; }
-        .gallery-dot.active  { background:var(--gold); width:30px; }
+        .gallery-dot.active  { background:var(--gold); transform:scale(1.15); box-shadow:0 0 0 4px rgba(212,183,120,.15); }
+        .gallery-swipe-hint { margin-top:14px; }
         .swipe-hint { font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:rgba(168,149,107,.38); text-align:center; margin-top:12px; padding:0 16px; }
 
         /* Wishes Wall */
@@ -843,7 +873,12 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         /* Desktop enhancements */
         @media (min-width:768px) {
           .hero-content { justify-content:center; padding-top:0; }
-          .hero-date { font-size:15px; }
+          .hero-eyebrow-row { gap:14px; margin-bottom:22px; }
+          .hero-rule { width:34px; }
+          .hero-date { font-size:14px; }
+          .hero-countdown-grid { gap:26px; }
+          .hero-count-cell { min-width:64px; }
+          .hero-count-num { font-size:2.7rem; }
           .venue-card { grid-template-columns:46px minmax(0,1fr) 44px; padding:18px 16px; column-gap:14px; }
           .venue-icon { width:46px; height:46px; }
           .venue-cta { width:44px; height:44px; }
@@ -851,8 +886,11 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           .dark-card-body  { flex-direction:row; gap:0; padding:56px 48px; }
           .dc-sep  { width:1px; height:auto; margin:0 44px; }
           .dc-item { flex:1; }
-          .gallery-slide   { min-width:300px; }
-          .gallery-track   { padding:0 32px; gap:14px; }
+          .gallery-head { margin-bottom:26px; }
+          .gallery-subtitle { font-size:10px; letter-spacing:.24em; }
+          .gallery-slide   { min-width:320px; }
+          .gallery-track   { padding:0 32px; gap:18px; }
+          .gallery-dots-wrap { margin-top:20px; }
           .parents-grid    { flex-direction:row; align-items:flex-start; gap:0; }
           .parent-divider-mobile { width:1px; height:56px; margin:0 24px; }
           .venue-cta:hover { background:var(--olive); color:white; border-color:var(--olive); }
