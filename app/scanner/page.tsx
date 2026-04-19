@@ -20,7 +20,8 @@ export default function ScannerPage() {
   // Función que se dispara al detectar un código QR
   const handleScan = async (detectedCodes: any) => {
     if (detectedCodes.length > 0 && !loading) {
-      const guestId = detectedCodes[0].rawValue;
+      const rawValue = detectedCodes[0].rawValue as string;
+      const guestId = rawValue.includes('/invite/') ? rawValue.split('/invite/').pop() || rawValue : rawValue;
 
       // Ocultar cámara, mostrar loading
       setLoading(true);

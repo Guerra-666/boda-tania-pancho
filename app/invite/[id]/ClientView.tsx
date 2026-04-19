@@ -1,24 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-
-// Mocks para resolver errores en el entorno de previsualización
-const QRCodeSVG = ({ size = 150, fgColor = "#000" }: any) => (
-  <svg width={size} height={size} viewBox="0 0 100 100" fill="none" stroke={fgColor} strokeWidth="2">
-    <rect x="10" y="10" width="30" height="30" fill="none" />
-    <rect x="15" y="15" width="20" height="20" fill={fgColor} />
-    <rect x="60" y="10" width="30" height="30" fill="none" />
-    <rect x="65" y="15" width="20" height="20" fill={fgColor} />
-    <rect x="10" y="60" width="30" height="30" fill="none" />
-    <rect x="15" y="65" width="20" height="20" fill={fgColor} />
-    <rect x="50" y="50" width="40" height="40" fill={fgColor} stroke="none" opacity="0.3"/>
-    <path d="M50 10 v80 M10 50 h80" strokeWidth="1" strokeDasharray="4 4" opacity="0.2"/>
-  </svg>
-);
-
-const updateRsvp = async (formData: FormData) => {
-  return new Promise(resolve => setTimeout(resolve, 1000));
-};
+import { useRouter } from 'next/navigation';
+import { updateRsvp } from '@/actions/guests';
+import { QRCodeSVG } from 'qrcode.react';
 
 // ── Iconos SVG en Línea
 const HeartIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
@@ -72,6 +57,7 @@ const MOCK_WISHES = [
 ];
 
 export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: any, messages?: { name: string, text: string }[] }) {
+  const router = useRouter();
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
   const [sealPopped, setSealPopped]         = useState(false);
   const [isPlaying, setIsPlaying]           = useState(false);
@@ -187,6 +173,17 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
     if (!statusInputRef.current || !rsvpFormRef.current) return;
     statusInputRef.current.value = status;
     rsvpFormRef.current.requestSubmit();
+  };
+
+  const handleRsvpAction = async (formData: FormData) => {
+    setIsSubmitting(true);
+    const response = await updateRsvp(formData);
+    if (!response?.success) {
+      setIsSubmitting(false);
+      return;
+    }
+    router.refresh();
+    setIsSubmitting(false);
   };
 
   const unitLabel: Record<string, string> = { days: 'Días', hours: 'Hrs', minutes: 'Min', seconds: 'Seg' };
@@ -528,7 +525,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                 {/* ================================================================ */}
                 {/* 🔴 AQUÍ ESTÁ EL CAMBIO PARA ARREGLAR EL ERROR DE VERCEL TYPE ERROR */}
                 {/* ================================================================ */}
-                <form ref={rsvpFormRef} action={async (formData) => { await updateRsvp(formData); }} onSubmit={() => setIsSubmitting(true)} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
+                <form ref={rsvpFormRef} action={handleRsvpAction} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
                   <input type="hidden" name="id" value={guest.id} />
                   <input ref={statusInputRef} type="hidden" name="status" defaultValue="confirmed" />
                   <div className="field-group">
