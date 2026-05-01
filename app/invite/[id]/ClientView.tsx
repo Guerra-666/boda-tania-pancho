@@ -333,80 +333,88 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         </section>
 
         {/* Bridge dark→cream */}
-        <div className="no-print" style={{ height:80, background:'linear-gradient(to bottom, #1A1710, #F8F5EE)', width:'100%' }} />
+        <div className="no-print" style={{ height:60, background:'linear-gradient(to bottom, #1A1710, #F8F5EE)', width:'100%', marginTop:'-2px' }} />
 
         <main className="content-bg flex flex-col items-center">
 
-          {/* QUOTE + PARENTS */}
-          <section className="mobile-sec sr text-center no-print mt-4">
-            <div className="orn-row"><div className="orn-l"/><HeartIcon size={11} className="text-[#D4B778]"/><div className="orn-l"/></div>
-            <blockquote className="quote-text mt-7">"Nuestro amor ha crecido con cada día compartido y ahora queremos sellarlo con una promesa eterna. Nos llenaría de felicidad contar con tu presencia en este día tan especial."</blockquote>
-            <div className="orn-row mt-7 mb-10"><div className="orn-l"/><HeartIcon size={11} className="text-[#D4B778]"/><div className="orn-l"/></div>
-            <p className="eyebrow mb-7">Con la bendición de nuestros padres</p>
-            <div className="parents-grid">
-              <div className="parent-col">
-                <p className="parent-name">María de los Angeles Becerril Samperio</p>
-              </div>
-              <div className="parent-divider-mobile" />
-              <div className="parent-col">
-                <p className="parent-name">Damaceno Quezada Guzmán</p>
-                <div className="parent-dot"/>
-                <p className="parent-name">Praxedis Santillán López</p>
-              </div>
-            </div>
-          </section>
+          {/* 🔴 SECCIÓN UNIFICADA: CITA, PADRES Y LUGARES DEL EVENTO 🔴 */}
+          <section className="mobile-sec sr no-print" style={{ paddingTop: '20px' }}>
+            <div className="flex flex-col justify-center h-full gap-10 md:gap-16">
 
-          {/* VENUES */}
-          <section className="mobile-sec sr no-print">
-            <p className="eyebrow mb-8 text-center">El Gran Día</p>
-            <div style={{ display:'flex', flexDirection:'column' }}>
-              <div className="venue-card">
-                <div className="venue-accent" />
-                <div className="venue-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-[#A8956B]">
-                    <path d="M12 3v4" />
-                    <path d="M9.5 5h5" />
-                    <path d="M6 10.5l6-4 6 4" />
-                    <path d="M7 10.5V19" />
-                    <path d="M17 10.5V19" />
-                    <path d="M9.5 19v-4.5h5V19" />
-                    <path d="M5 19h14" />
-                  </svg>
+              {/* Parte Superior: Cita y Padres */}
+              <div className="text-center">
+                <div className="orn-row"><div className="orn-l"/><HeartIcon size={11} className="text-[#D4B778]"/><div className="orn-l"/></div>
+                <blockquote className="quote-text mt-6 mb-8">"Nuestro amor ha crecido con cada día compartido y ahora queremos sellarlo con una promesa eterna. Nos llenaría de felicidad contar con tu presencia en este día tan especial."</blockquote>
+
+                <p className="eyebrow mb-6">Con la bendición de nuestros padres</p>
+                <div className="parents-grid">
+                  <div className="parent-col">
+                    <p className="parent-name">María de los Angeles Becerril Samperio</p>
+                  </div>
+                  <div className="parent-divider-mobile" />
+                  <div className="parent-col">
+                    <p className="parent-name">Damaceno Quezada Guzmán</p>
+                    <div className="parent-dot"/>
+                    <p className="parent-name">Praxedis Santillán López</p>
+                  </div>
                 </div>
-                <div className="venue-body">
-                  <p className="venue-type">Ceremonia Religiosa</p>
-                  <p className="venue-name">Parroquia San Jose</p>
-                  <p className="venue-time">2:00 pm</p>
-                </div>
-                <a href="https://maps.app.goo.gl/Z8q1SishVrgxWSAF9?g_st=aw" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
-                  <ArrowIcon size={15} />
-                </a>
               </div>
-              <div className="venue-connector">
-                <div style={{ width:1, height:12, background:'#E8E4D8' }}/>
-                <div style={{ width:5, height:5, borderRadius:'50%', border:'1px solid #D4B778', background:'#F8F5EE', margin:'0 -1px' }}/>
-                <div style={{ width:1, height:12, background:'#E8E4D8' }}/>
-              </div>
-              <div className="venue-card">
-                <div className="venue-accent" />
-                <div className="venue-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-[#A8956B]">
-                    <path d="M4 10h16" />
-                    <path d="M6 10V7l6-3 6 3v3" />
-                    <path d="M7 10v8" />
-                    <path d="M17 10v8" />
-                    <path d="M10 18v-3.5a2 2 0 0 1 4 0V18" />
-                    <path d="M5 18h14" />
-                  </svg>
+
+              {/* Parte Inferior: Lugares del Evento */}
+              <div className="w-full max-w-[500px] mx-auto">
+                <p className="eyebrow mb-6 text-center">El Gran Día</p>
+                <div style={{ display:'flex', flexDirection:'column' }}>
+                  <div className="venue-card">
+                    <div className="venue-accent" />
+                    <div className="venue-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-[#A8956B]">
+                        <path d="M12 3v4" />
+                        <path d="M9.5 5h5" />
+                        <path d="M6 10.5l6-4 6 4" />
+                        <path d="M7 10.5V19" />
+                        <path d="M17 10.5V19" />
+                        <path d="M9.5 19v-4.5h5V19" />
+                        <path d="M5 19h14" />
+                      </svg>
+                    </div>
+                    <div className="venue-body">
+                      <p className="venue-type">Ceremonia Religiosa</p>
+                      <p className="venue-name">Parroquia San Jose</p>
+                      <p className="venue-time">2:00 pm</p>
+                    </div>
+                    <a href="https://maps.app.goo.gl/Z8q1SishVrgxWSAF9?g_st=aw" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
+                      <ArrowIcon size={15} />
+                    </a>
+                  </div>
+
+                  <div className="venue-connector">
+                    <div style={{ width:1, height:12, background:'#E8E4D8' }}/>
+                    <div style={{ width:5, height:5, borderRadius:'50%', border:'1px solid #D4B778', background:'#F8F5EE', margin:'0 -1px' }}/>
+                    <div style={{ width:1, height:12, background:'#E8E4D8' }}/>
+                  </div>
+
+                  <div className="venue-card">
+                    <div className="venue-accent" />
+                    <div className="venue-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-[#A8956B]">
+                        <path d="M4 10h16" />
+                        <path d="M6 10V7l6-3 6 3v3" />
+                        <path d="M7 10v8" />
+                        <path d="M17 10v8" />
+                        <path d="M10 18v-3.5a2 2 0 0 1 4 0V18" />
+                        <path d="M5 18h14" />
+                      </svg>
+                    </div>
+                    <div className="venue-body">
+                      <p className="venue-type">Boda Civil y Recepción</p>
+                      <p className="venue-name">Finca los Arcos</p>
+                      <p className="venue-time">3:30 pm</p>
+                    </div>
+                    <a href="https://maps.app.goo.gl/XEX2knTRz3nnYEy87?g_st=aw" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
+                      <ArrowIcon size={15} />
+                    </a>
+                  </div>
                 </div>
-                <div className="venue-body">
-                  <p className="venue-type">Boda Civil y Recepción</p>
-                  <p className="venue-name">Finca los Arcos</p>
-                  <p className="venue-time">3:30 pm</p>
-                </div>
-                <a href="https://maps.app.goo.gl/XEX2knTRz3nnYEy87?g_st=aw" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
-                  <ArrowIcon size={15} />
-                </a>
               </div>
             </div>
           </section>
@@ -418,7 +426,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               <div className="dark-card-overlay" />
               <div className="dark-card-body">
                 <div className="dc-item">
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-4">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-6">
                     <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H7v10a1 1 0 001 1h8a1 1 0 001-1V10h3.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>
                   </svg>
                   <h3 className="dc-title">Código de Vestimenta</h3>
@@ -426,15 +434,17 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   <div className="dc-rule"/>
                   <p className="dc-body">Nos encantaría que nos acompañen luciendo su mejor estilo. Con mucho cariño, les sugerimos amablemente evitar los tonos blanco, rojo y verde olivo para mantener la armonía de la celebración.</p>
                 </div>
+
                 <div className="dc-sep" />
+
                 <div className="dc-item">
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-4">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-6">
                     <path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/>
                   </svg>
-                  <h3 className="dc-title" style={{ fontSize: '1.4rem' }}>Su presencia es lo más importante</h3>
-                  <p className="dc-sub">Lluvia de Sobres</p>
+                  <h3 className="dc-title" style={{ fontSize: 'clamp(1.4rem, 5.5vw, 1.8rem)' }}>Su presencia es lo más importante</h3>
+                  <p className="dc-sub">Mesa de regalos</p>
                   <div className="dc-rule"/>
-                  <p className="dc-body">Nuestra mayor alegría es que nos acompañen. Sin embargo, si desean tener un detalle con nosotros, contaremos con un buzón en la recepción; cualquier presente será profundamente agradecido.</p>
+                  <p className="dc-body">El que nos acompañen es lo mas importante para nostros. Sin embargo, lo que salga de su corazon sera bien recibido en el nuestro.</p>
                 </div>
               </div>
             </div>
@@ -452,7 +462,6 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   <div key={idx} className={`gallery-slide ${idx===activeSlide ? 'is-active' : ''}`}>
                     <div className="gallery-frame">
                       <img src={photo.src} alt="Nuestra foto" className="gallery-img" loading="lazy" draggable={false} />
-                      {/* Se eliminó la capa oscura con los textos sobre la imagen */}
                     </div>
                   </div>
                 ))}
@@ -471,11 +480,11 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
           {/* ══ MURO DE LOS DESEOS (GUESTBOOK) ══ */}
           {messages && messages.length > 0 && (
-            <section className="mobile-sec-full sr no-print mt-12 mb-20">
-              <div className="dark-card" style={{ padding: '70px 0' }}>
+            <section className="mobile-sec-full sr no-print">
+              <div className="dark-card">
                 <div className="dark-card-overlay" style={{ background: 'linear-gradient(160deg, #1A1710 0%, #2A3618 100%)' }} />
 
-                <div className="relative z-10 flex flex-col items-center w-full">
+                <div className="relative z-10 flex flex-col items-center justify-center w-full h-full py-12">
                   <p className="eyebrow mb-10 text-[rgba(212,183,120,0.8)]">Muro de los Deseos</p>
 
                   <div className="wishes-track hide-sb">
@@ -550,7 +559,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                 <div className="rsvp-deadline">
                   <CalendarIcon size={20} className="text-[#4A5D23] flex-shrink-0" />
                   <div className="text-left">
-                    <strong className="block text-[#4A5D23] font-bold text-[13px] mb-0.5">Agradecemos tu confirmación antes del 5 de septiembre, por temas de logística.</strong>
+                    <strong className="block text-[#4A5D23] font-bold text-[13px] mb-0.5">Agradecemos tu confirmación antes del 5 de septiembre,</strong>
+                    <span className="text-[#655C4B] text-[11px]">por temas de logística.</span>
                   </div>
                 </div>
                 <div className="text-center mb-8">
@@ -674,7 +684,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           position: relative;
           background: #FDFCF9;
           border: 1px solid var(--stone);
-          border-radius: 4px;
+          border-radius: 12px;
           overflow: hidden;
           box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
         }
@@ -746,6 +756,19 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         /* Invite root */
         .invite-root { background:var(--cream); font-family:var(--ff-b); color:var(--muted); }
 
+        /* Content & Sections */
+        .content-bg { background:var(--cream); width:100%; display: flex; flex-direction: column; }
+
+        .mobile-sec {
+          width:100%; max-width:540px; padding:60px 24px; margin:0 auto;
+          min-height:100dvh; display:flex; flex-direction:column; justify-content:center; align-items:stretch;
+        }
+
+        .mobile-sec-full {
+          width:100%; margin:0; padding:40px 0;
+          min-height:100dvh; display:flex; flex-direction:column; justify-content:center;
+        }
+
         /* Hero */
         @keyframes fade-up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
         .corner-frame { pointer-events:none; }
@@ -753,10 +776,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .hero-vignette { background:radial-gradient(ellipse at 50% 38%, rgba(255,255,255,.05) 0%, rgba(18,15,10,.2) 54%, rgba(18,15,10,.48) 100%); }
         .hero-eyebrow-row { display:flex; align-items:center; justify-content:center; gap:12px; animation:fade-up 1s .2s both; margin-bottom:20px; }
         .hero-rule { width:26px; height:1px; background:rgba(212,183,120,.62); }
-
-        /* 🔴 CAMBIO: "Nos Casamos" mucho más grande y brillante */
         .hero-eyebrow { font-family:var(--ff-b); font-size:clamp(14px,4vw,18px); letter-spacing:.5em; text-transform:uppercase; color:#D4B778; font-weight:700; text-shadow:0 3px 8px rgba(0,0,0,0.9); }
-
         .hero-bg-layer { z-index:0; }
         .hero-bg-slide { opacity:0; transition:opacity 1800ms cubic-bezier(.25,.46,.45,.94), transform 900ms ease-out; }
         .hero-bg-slide.is-active { opacity:1; }
@@ -766,10 +786,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .h-amp  { display:block; font-size:clamp(2rem,8.5vw,3.8rem); color:var(--gold-lt); font-style:italic; animation:fade-up 1.1s both; opacity:0; margin:4px 0; }
         .an-1{animation-delay:.1s} .an-2{animation-delay:.3s} .an-3{animation-delay:.5s} .an-4{animation-delay:.7s} .an-5{animation-delay:.9s} .an-6{animation-delay:1.1s}
         .hero-divider { width:1px; height:40px; background:linear-gradient(to bottom,transparent,rgba(212,183,120,.48),transparent); margin:16px auto; animation:fade-up 1s both; opacity:0; }
-
-        /* 🔴 CAMBIO: Fecha ajustada */
         .hero-date { display:inline-block; font-family:var(--ff-b); font-size:clamp(11px,3.6vw,14px); letter-spacing:.42em; text-transform:uppercase; color:rgba(253,252,249,.94); font-weight:500; animation:fade-up 1s both; opacity:0; text-shadow:0 5px 14px rgba(0,0,0,.4); padding:8px 10px 8px 14px; border:1px solid rgba(212,183,120,.42); border-radius:2px; background:rgba(212,183,120,.08); }
-
         .hero-countdown { animation:fade-up 1s both; opacity:0; margin-top:16px; }
         .hero-countdown-label { font-size:8px; letter-spacing:.34em; text-transform:uppercase; color:rgba(212,183,120,.86); margin-bottom:10px; text-align:center; }
         .hero-countdown-grid { display:flex; gap:14px; justify-content:center; }
@@ -778,11 +795,6 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .hero-count-unit { font-size:8px; letter-spacing:.18em; text-transform:uppercase; color:#D4B778; margin-top:4px; }
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
         .bounce-anim { animation:bounce 2s ease-in-out infinite; }
-
-        /* Content */
-        .content-bg { background:var(--cream); width:100%; }
-        .mobile-sec { width:100%; max-width:500px; padding:0 20px; margin-bottom:60px; align-self:center; }
-        .mobile-sec-full { width:100%; margin-bottom:60px; }
 
         /* Eyebrow */
         .eyebrow { font-family:var(--ff-b); font-size:9px; letter-spacing:.35em; text-transform:uppercase; color:var(--gold); font-weight:500; display:block; text-align:center; }
@@ -806,7 +818,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .parent-divider-mobile { width:40px; height:1px; background:var(--stone); margin:4px 0; }
 
         /* Venues */
-        .venue-card { display:grid; grid-template-columns:44px minmax(0,1fr) 40px; align-items:center; column-gap:12px; background:white; padding:14px 13px; border:1px solid var(--stone); border-radius:3px; position:relative; overflow:hidden; -webkit-tap-highlight-color:transparent; box-shadow:0 10px 26px -18px rgba(0,0,0,.3); }
+        .venue-card { display:grid; grid-template-columns:44px minmax(0,1fr) 40px; align-items:center; column-gap:12px; background:white; padding:14px 13px; border:1px solid var(--stone); border-radius:16px; position:relative; overflow:hidden; -webkit-tap-highlight-color:transparent; box-shadow:0 10px 26px -18px rgba(0,0,0,.3); }
         .venue-accent { position:absolute; top:0; left:0; bottom:0; width:2px; background:linear-gradient(to bottom,transparent,var(--gold-lt),transparent); opacity:.35; transition:opacity .3s; }
         .venue-card:active .venue-accent { opacity:1; }
         .venue-icon { width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#F8F5EE; border:1px solid #EFE8D9; border-radius:50%; }
@@ -818,23 +830,44 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .venue-cta:active { background:var(--olive); color:white; border-color:var(--olive); }
         .venue-connector { display:flex; align-items:center; justify-content:flex-start; height:34px; padding-left:21px; }
 
-        /* Dark card */
-        .dark-card { position:relative; overflow:hidden; border:1px solid rgba(212,183,120,.13); border-radius:4px; box-shadow:0 20px 45px -30px rgba(0,0,0,.5); }
+        /* 🔴 Dark card ACTUALIZADA 🔴 */
+        .dark-card {
+          position:relative; overflow:hidden; border:1px solid rgba(212,183,120,.13);
+          border-radius:24px; box-shadow:0 20px 45px -30px rgba(0,0,0,.5);
+          margin:0 16px;
+          min-height: 90dvh; /* Ocupará el 90% de la altura de la pantalla */
+          display:flex; flex-direction:column;
+        }
         .dark-card-bg { position:absolute; inset:0; background-size:cover; background-position:center; filter:saturate(0) brightness(.2); }
         .dark-card-overlay { position:absolute; inset:0; background:linear-gradient(160deg,rgba(22,20,12,.82),rgba(38,52,16,.78)); }
-        .dark-card-body { position:relative; z-index:10; padding:48px 24px; display:flex; flex-direction:column; gap:36px; }
-        .dc-item  { text-align:center; }
 
-        /* 🔴 CAMBIO: Títulos y Texto más legible en tarjeta oscura */
-        .dc-title { font-family:var(--ff-d); color:#F8F5EE; font-size:clamp(1.4rem, 5vw, 1.6rem); font-weight:300; margin-bottom:4px; line-height:1.1; }
-        .dc-sub   { font-size:8px; letter-spacing:.4em; text-transform:uppercase; color:rgba(212,183,120,.8); margin-bottom:14px; }
-        .dc-rule  { width:26px; height:1px; background:rgba(212,183,120,.4); margin:0 auto 14px; }
-        .dc-body  { font-size:14px; line-height:1.65; color:rgba(250,248,242,0.9); font-weight:400; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .dark-card-body {
+          position:relative; z-index:10;
+          padding: 10vh 24px;
+          display:flex; flex-direction:column;
+          justify-content: space-evenly; /* Distribuye las dos partes (vestimenta / regalos) a lo alto de la pantalla */
+          flex: 1;
+          gap: 2rem;
+        }
 
-        .dc-sep   { width:56px; height:1px; background:rgba(255,255,255,.1); margin:0 auto; }
+        .dc-item  {
+          text-align:center;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .dc-title { font-family:var(--ff-d); color:#F8F5EE; font-size:clamp(1.6rem, 6vw, 1.8rem); font-weight:300; margin-bottom:6px; line-height:1.1; }
+        .dc-sub   { font-size:9px; letter-spacing:.45em; text-transform:uppercase; color:rgba(212,183,120,.9); margin-bottom:18px; }
+        .dc-rule  { width:32px; height:1px; background:rgba(212,183,120,.5); margin:0 auto 16px; }
+        .dc-body  { font-size:14px; line-height:1.75; color:rgba(250,248,242,0.95); font-weight:400; text-shadow: 0 1px 3px rgba(0,0,0,0.9); max-width: 400px; margin: 0 auto; }
+
+        .dc-sep   {
+          width:120px; height:1px;
+          background:linear-gradient(to right, transparent, rgba(212,183,120,.4), transparent);
+          margin:0 auto;
+        }
 
         /* Gallery */
-        .gallery-head { text-align:center; margin-bottom:22px; }
+        .gallery-head { text-align:center; margin-bottom:32px; }
         .gallery-title { font-family:var(--ff-d); color:var(--olive); font-size:clamp(1.8rem,7vw,2.5rem); font-weight:300; line-height:1.08; margin-top:10px; }
         .gallery-subtitle { margin-top:8px; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(138,130,117,.9); }
         .gallery-shell { position:relative; }
@@ -846,8 +879,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .hide-sb { -ms-overflow-style:none; scrollbar-width:none; }
         .gallery-slide { min-width:calc(88vw - 16px); max-width:380px; flex-shrink:0; scroll-snap-align:center; opacity:.65; transform:scale(.965); transition:transform .4s ease, opacity .4s ease; }
         .gallery-slide.is-active { opacity:1; transform:scale(1); }
-        .gallery-frame { position:relative; aspect-ratio:4/5; border-radius:6px; overflow:hidden; background:var(--stone); border:1px solid rgba(212,183,120,.45); box-shadow:0 24px 44px -28px rgba(0,0,0,.5); }
-        .gallery-frame::before { content:''; position:absolute; inset:8px; border:1px solid rgba(253,252,249,.4); border-radius:4px; pointer-events:none; z-index:2; }
+        .gallery-frame { position:relative; aspect-ratio:4/5; border-radius:16px; overflow:hidden; background:var(--stone); border:1px solid rgba(212,183,120,.45); box-shadow:0 24px 44px -28px rgba(0,0,0,.5); }
+        .gallery-frame::before { content:''; position:absolute; inset:8px; border:1px solid rgba(253,252,249,.4); border-radius:8px; pointer-events:none; z-index:2; }
         .gallery-img   { width:100%; height:100%; object-fit:cover; display:block; transform:translateZ(0) scale(1.03); backface-visibility:hidden; transition:transform 1.2s ease; }
         .gallery-slide.is-active .gallery-img { transform:translateZ(0) scale(1.08); }
         .gallery-dots-wrap { position:relative; margin-top:18px; padding:0 16px; }
@@ -861,48 +894,50 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
         /* Wishes Wall */
         .wishes-track { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; gap:16px; padding:0 24px; width: 100%; }
-        .wish-card { min-width:calc(85vw - 32px); max-width:420px; flex-shrink:0; scroll-snap-align:center; background:rgba(253,252,249,0.02); border:1px solid rgba(212,183,120,0.1); padding:48px 32px; display:flex; flex-direction:column; align-items:center; text-align:center; border-radius:3px; }
+        .wish-card { min-width:calc(85vw - 32px); max-width:420px; flex-shrink:0; scroll-snap-align:center; background:rgba(253,252,249,0.02); border:1px solid rgba(212,183,120,0.1); padding:48px 32px; display:flex; flex-direction:column; align-items:center; text-align:center; border-radius:12px; }
         .wish-text { font-family:var(--ff-d); font-size:1.35rem; font-style:italic; color:#FDFCF9; line-height:1.6; font-weight:300; }
         .wish-sep { width:32px; height:1px; background:rgba(212,183,120,0.25); margin:24px 0; }
         .wish-author { font-family:var(--ff-b); font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold-lt); font-weight:500; }
 
         /* RSVP */
-        .rsvp-card  { background:white; border:1px solid var(--stone); padding:2.5rem 1.4rem; border-radius:3px; position:relative; overflow:hidden; box-shadow:0 20px 40px -32px rgba(0,0,0,.45); }
+        .rsvp-card  { background:white; border:1px solid var(--stone); padding:3rem 1.6rem; border-radius:16px; position:relative; overflow:hidden; box-shadow:0 24px 50px -24px rgba(0,0,0,.2); }
         .rsvp-stripe { position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--olive-dk),var(--gold-lt),var(--olive-dk)); }
         .rsvp-stripe.confirmed { background:linear-gradient(90deg,var(--olive),#8FBF3A,var(--gold-lt)); }
         .rsvp-title  { font-family:var(--ff-d); font-size:1.9rem; color:var(--olive); font-weight:300; }
         .rsvp-sub    { font-size:11px; color:var(--muted); }
         .rsvp-guest  { font-family:var(--ff-d); font-size:1.45rem; color:var(--olive); font-style:italic; margin-top:4px; word-break:break-word; }
-        .rsvp-deadline { display:flex; align-items:center; justify-content:center; gap:12px; margin:4px 0 24px; padding:16px; background:linear-gradient(180deg,#F4F7EB,#EAF0DA); border:1px solid #C9D6AD; border-radius:4px; font-size:12px; line-height:1.4; box-shadow:0 4px 12px -6px rgba(74,93,35,0.15); }
-        .rsvp-expired { margin-top:30px; padding:24px 20px; background:#FDFCF9; border:1px dashed #A8956B; border-radius:4px; text-align:center; color:#6C644F; font-size:13px; line-height:1.6; }
+        .rsvp-deadline { display:flex; align-items:center; justify-content:center; gap:12px; margin:4px 0 24px; padding:16px; background:linear-gradient(180deg,#F4F7EB,#EAF0DA); border:1px solid #C9D6AD; border-radius:8px; font-size:12px; line-height:1.4; box-shadow:0 4px 12px -6px rgba(74,93,35,0.15); }
+        .rsvp-expired { margin-top:30px; padding:24px 20px; background:#FDFCF9; border:1px dashed #A8956B; border-radius:8px; text-align:center; color:#6C644F; font-size:13px; line-height:1.6; }
         .tickets-pill { background:var(--cream); border:1px solid var(--stone); padding:12px 16px; text-align:center; border-radius:2px; font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
         .tickets-note { margin-top:10px; font-size:11px; line-height:1.55; color:#7A705F; text-align:center; }
         .confirm-preview { margin-top:8px; font-size:12px; color:#6C644F; background:var(--cream); border:1px solid var(--stone); padding:9px 10px; border-radius:2px; text-align:center; }
         .qr-frame { display:inline-block; background:white; padding:14px; border:1px solid var(--stone); }
         .qr-hint  { font-size:11px; color:var(--muted); line-height:1.6; max-width:230px; margin:0 auto; }
+
         /* Fields */
         .field-group  { display:flex; flex-direction:column; gap:8px; }
         .field-label  { font-size:8px; font-weight:600; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); }
         .field-select { width:100%; padding:14px 36px 14px 0; background:transparent; border:none; border-bottom:1px solid var(--stone); font-family:var(--ff-d); font-size:1.15rem; color:var(--olive); outline:none; appearance:none; -webkit-appearance:none; cursor:pointer; border-radius:0; }
         .field-select:focus { border-color:var(--olive); }
         .field-arrow  { position:absolute; right:4px; top:50%; transform:translateY(-50%); pointer-events:none; color:var(--gold); }
-        .field-textarea { width:100%; padding:14px; background:var(--cream); border:1px solid var(--stone); font-family:var(--ff-b); font-size:16px; color:var(--ink); outline:none; resize:none; border-radius:1px; line-height:1.7; -webkit-appearance:none; }
+        .field-textarea { width:100%; padding:14px; background:var(--cream); border:1px solid var(--stone); font-family:var(--ff-b); font-size:16px; color:var(--ink); outline:none; resize:none; border-radius:4px; line-height:1.7; -webkit-appearance:none; }
         .field-textarea::placeholder { color:#C4BFB6; }
         .field-textarea:focus { border-color:var(--olive); }
         .field-hint { font-size:9px; color:rgba(168,149,107,.45); text-align:right; letter-spacing:.1em; }
+
         /* Buttons */
-        .btn-primary  { width:100%; min-height:56px; padding:16px 24px; background:var(--olive); color:white; border:none; border-radius:1px; font-family:var(--ff-b); font-size:10px; letter-spacing:.3em; text-transform:uppercase; font-weight:600; cursor:pointer; transition:background .25s,transform .1s; -webkit-tap-highlight-color:transparent; }
+        .btn-primary  { width:100%; min-height:56px; padding:16px 24px; background:var(--olive); color:white; border:none; border-radius:4px; font-family:var(--ff-b); font-size:10px; letter-spacing:.3em; text-transform:uppercase; font-weight:600; cursor:pointer; transition:background .25s,transform .1s; -webkit-tap-highlight-color:transparent; }
         .btn-primary:active:not(:disabled)  { background:var(--olive-dk); transform:scale(.99); }
         .btn-primary:disabled { opacity:.6; cursor:wait; }
-        .btn-secondary{ width:100%; min-height:50px; padding:14px 24px; background:transparent; color:var(--muted); border:1px solid var(--stone); border-radius:1px; font-family:var(--ff-b); font-size:10px; letter-spacing:.25em; text-transform:uppercase; cursor:pointer; transition:all .25s; -webkit-tap-highlight-color:transparent; }
+        .btn-secondary{ width:100%; min-height:50px; padding:14px 24px; background:transparent; color:var(--muted); border:1px solid var(--stone); border-radius:4px; font-family:var(--ff-b); font-size:10px; letter-spacing:.25em; text-transform:uppercase; cursor:pointer; transition:all .25s; -webkit-tap-highlight-color:transparent; }
         .btn-secondary:active:not(:disabled) { color:var(--olive); background:var(--stone); }
         .btn-secondary:disabled { opacity:.6; cursor:wait; }
         .confirm-modal-backdrop { position:fixed; inset:0; z-index:80; background:rgba(15,13,10,.66); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); display:flex; align-items:flex-end; justify-content:center; padding:18px 14px calc(22px + var(--safe-b)); }
-        .confirm-modal-card { width:min(100%, 420px); background:#FDFCF9; border:1px solid var(--stone); box-shadow:0 30px 50px -30px rgba(0,0,0,.55); border-radius:4px; padding:22px 16px 16px; }
+        .confirm-modal-card { width:min(100%, 420px); background:#FDFCF9; border:1px solid var(--stone); box-shadow:0 30px 50px -30px rgba(0,0,0,.55); border-radius:8px; padding:22px 16px 16px; }
         .confirm-modal-title { font-family:var(--ff-d); font-size:1.7rem; color:var(--olive); text-align:center; font-weight:300; }
         .confirm-modal-copy { margin-top:10px; color:#6C644F; font-size:14px; line-height:1.6; text-align:center; }
         .confirm-modal-actions { display:flex; gap:10px; margin-top:18px; }
-        .confirm-modal-btn { flex:1; min-height:46px; border-radius:2px; font-family:var(--ff-b); font-size:10px; letter-spacing:.22em; text-transform:uppercase; }
+        .confirm-modal-btn { flex:1; min-height:46px; border-radius:4px; font-family:var(--ff-b); font-size:10px; letter-spacing:.22em; text-transform:uppercase; }
         .confirm-modal-btn.secondary { border:1px solid var(--stone); background:white; color:var(--muted); }
         .confirm-modal-btn.primary { border:1px solid var(--olive); background:var(--olive); color:white; }
 
@@ -929,6 +964,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           .venue-icon { width:46px; height:46px; }
           .venue-cta { width:44px; height:44px; }
           .venue-connector { padding-left:24px; }
+          .dark-card { margin:0 auto; max-width: 900px; border-radius: 32px; }
           .dark-card-body  { flex-direction:row; gap:0; padding:56px 48px; }
           .dc-sep  { width:1px; height:auto; margin:0 44px; }
           .dc-item { flex:1; }
