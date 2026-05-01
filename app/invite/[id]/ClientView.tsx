@@ -344,9 +344,18 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               {/* Parte Superior: Cita y Padres */}
               <div className="text-center">
                 <div className="orn-row"><div className="orn-l"/><HeartIcon size={11} className="text-[#D4B778]"/><div className="orn-l"/></div>
-                <blockquote className="quote-text mt-6 mb-8">"Nuestro amor ha crecido con cada día compartido y ahora queremos sellarlo con una promesa eterna. Nos llenaría de felicidad contar con tu presencia en este día tan especial."</blockquote>
-
+                <blockquote className="quote-text mt-6 mb-8">"Nuestro amor ha crecido con cada día compartido y ahora queremos sellarlo con una promesa eterna.
+                "</blockquote>
+                <br></br>
+                <br></br>
+                  Nos llenaría de felicidad contar con tu presencia en este día tan especial.
+                <br></br>
+                <br></br>
+                <br></br>
+                <br></br>
                 <p className="eyebrow mb-6">Con la bendición de nuestros padres</p>
+                <br></br>
+
                 <div className="parents-grid">
                   <div className="parent-col">
                     <p className="parent-name">María de los Angeles Becerril Samperio</p>
@@ -559,8 +568,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                 <div className="rsvp-deadline">
                   <CalendarIcon size={20} className="text-[#4A5D23] flex-shrink-0" />
                   <div className="text-left">
-                    <strong className="block text-[#4A5D23] font-bold text-[13px] mb-0.5">Agradecemos tu confirmación antes del 5 de septiembre,</strong>
-                    <span className="text-[#655C4B] text-[11px]">por temas de logística.</span>
+                    <strong className="block text-[#4A5D23] font-bold text-[13px] mb-0.5">Agradecemos tu confirmación antes del 15 de Agosto, por temas de logística.</strong>
                   </div>
                 </div>
                 <div className="text-center mb-8">
@@ -661,9 +669,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         {/* FOOTER */}
         <footer className="invite-footer no-print">
           <div className="orn-row mb-5"><div className="orn-l-dk"/><HeartIcon size={10} className="text-[rgba(212,183,120,0.35)]"/><div className="orn-l-dk"/></div>
-          <p className="footer-names">Tania & Francisco</p>
+          <p className="footer-names">Tania Y Francisco</p>
           <p className="footer-year">2026</p>
-          <p className="footer-credit">Made with love by Familia Guerra Guzman</p>
         </footer>
       </div>
 
