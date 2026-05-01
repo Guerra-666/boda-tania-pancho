@@ -42,9 +42,19 @@ const DiscIcon = ({ size = 24, className = '' }: { size?: number; className?: st
     <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
   </svg>
 );
+const PlayIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
 const PauseIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+  </svg>
+);
+const CalendarIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
   </svg>
 );
 const ArrowIcon = ({ size = 16, className = '' }: { size?: number; className?: string }) => (
@@ -89,6 +99,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const [heroSlide, setHeroSlide]           = useState(0);
   const [ticketsSelection, setTicketsSelection] = useState(1);
   const [activeRsvpModal, setActiveRsvpModal] = useState<'confirmed' | 'declined' | null>(null);
+  const [isRsvpExpired, setIsRsvpExpired]   = useState(false);
 
   const audioRef   = useRef<HTMLAudioElement>(null);
   const heroRef    = useRef<HTMLDivElement>(null);
@@ -103,6 +114,9 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const isDeclined  = guest.status === 'declined';
 
   useEffect(() => {
+    // 🔴 Bloqueo de confirmación a partir del 16 de Agosto de 2026 (Media noche)
+    setIsRsvpExpired(new Date() >= new Date('2026-08-16T00:00:00'));
+
     setPetals(Array.from({ length: 14 }, (_, i) => ({
       id: i, left: Math.random() * 100, delay: Math.random() * 10,
       duration: 9 + Math.random() * 7, size: 7 + Math.random() * 10,
@@ -214,10 +228,20 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
       <audio ref={audioRef} loop src="/song.mp3" />
 
       {/* Music FAB */}
-      <button onClick={toggleAudio} aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
+      <button onClick={toggleAudio} aria-label={isPlaying ? 'Pausar música' : 'Reproducir música'}
         className={`music-fab fixed z-40 transition-all duration-500 ${isEnvelopeOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0 pointer-events-none'}`}>
         <div className="music-fab-ring" />
-        {isPlaying ? <DiscIcon size={18} className="text-[#A8956B] spin-slow relative z-10" /> : <PauseIcon size={18} className="text-[#A8956B] relative z-10" />}
+        {isPlaying ? (
+          <>
+            <PauseIcon size={12} className="text-[#A8956B] relative z-10" />
+            <span className="relative z-10 text-[#A8956B] font-bold tracking-widest text-[9px] uppercase mt-0.5">Pausar</span>
+          </>
+        ) : (
+          <>
+            <PlayIcon size={12} className="text-[#A8956B] relative z-10" />
+            <span className="relative z-10 text-[#A8956B] font-bold tracking-widest text-[9px] uppercase mt-0.5">Música</span>
+          </>
+        )}
       </button>
 
       {/* ══ ENVELOPE ══ */}
@@ -524,7 +548,10 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               <div className="rsvp-card no-print">
                 <div className="rsvp-stripe" />
                 <div className="rsvp-deadline">
-                  <strong>Tienes hasta el 5 de septiembre de 2026 para confirmar tu asistencia.</strong>
+                  <CalendarIcon size={20} className="text-[#4A5D23] flex-shrink-0" />
+                  <div className="text-left">
+                    <strong className="block text-[#4A5D23] font-bold text-[13px] mb-0.5">Agradecemos tu confirmación antes del 5 de septiembre, por temas de logística.</strong>
+                  </div>
                 </div>
                 <div className="text-center mb-8">
                   <p className="eyebrow mb-3">R · S · V · P</p>
@@ -535,47 +562,55 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                 <div className="tickets-pill">Pases disponibles: <strong className="ml-1 text-[#4A5D23]">{guest.ticketsTotal}</strong></div>
                 <p className="tickets-note">No hay pases extras. Solo se permitirá el acceso al número de personas confirmadas.</p>
 
-                <form ref={rsvpFormRef} action={async (formData) => { await handleRsvpAction(formData); }} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
-                  <input type="hidden" name="id" value={guest.id} />
-                  <input ref={statusInputRef} type="hidden" name="status" defaultValue="confirmed" />
-                  <div className="field-group">
-                    <label className="field-label">¿Cuántos asistirán?</label>
-                    <div style={{ position:'relative' }}>
-                      <select name="ticketsConfirmed" className="field-select" value={ticketsSelection} onChange={(e) => setTicketsSelection(Number(e.target.value))}>
-                        {[...Array(guest.ticketsTotal)].map((_,i) => (
-                          <option key={i+1} value={i+1}>{i+1} {i===0?'Persona':'Personas'}</option>
-                        ))}
-                      </select>
-                      <div className="field-arrow"><ChevronDownIcon size={14}/></div>
+                {isRsvpExpired ? (
+                  <div className="rsvp-expired">
+                    <p className="font-serif text-[1.4rem] text-[#4A5D23] mb-2">Periodo concluido</p>
+                    <p>El tiempo para confirmar asistencia ha finalizado. Si tienes alguna duda respecto a tu invitación, te pedimos contactar directamente a los novios.</p>
+                    <p className="mt-3 font-bold">¡Muchas gracias por tu comprensión!</p>
+                  </div>
+                ) : (
+                  <form ref={rsvpFormRef} action={async (formData) => { await handleRsvpAction(formData); }} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
+                    <input type="hidden" name="id" value={guest.id} />
+                    <input ref={statusInputRef} type="hidden" name="status" defaultValue="confirmed" />
+                    <div className="field-group">
+                      <label className="field-label">¿Cuántos asistirán?</label>
+                      <div style={{ position:'relative' }}>
+                        <select name="ticketsConfirmed" className="field-select" value={ticketsSelection} onChange={(e) => setTicketsSelection(Number(e.target.value))}>
+                          {[...Array(guest.ticketsTotal)].map((_,i) => (
+                            <option key={i+1} value={i+1}>{i+1} {i===0?'Persona':'Personas'}</option>
+                          ))}
+                        </select>
+                        <div className="field-arrow"><ChevronDownIcon size={14}/></div>
+                      </div>
+                      <p className="confirm-preview">Confirmar asistencia para: <strong>{ticketsSelection} {ticketsSelection === 1 ? 'persona' : 'personas'}</strong></p>
                     </div>
-                    <p className="confirm-preview">Confirmar asistencia para: <strong>{ticketsSelection} {ticketsSelection === 1 ? 'persona' : 'personas'}</strong></p>
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label" style={{ display:'flex', alignItems:'center', gap:8 }}>
-                      <HeartIcon size={11} className="text-[#D4B778]"/>Mensaje a los novios
-                    </label>
-                    <textarea name="message" maxLength={250} rows={4} placeholder="Escribe tus mejores deseos…" className="field-textarea" />
-                    <p className="field-hint">Máx. 250 caracteres</p>
-                  </div>
-                  <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem', paddingTop:'0.5rem' }}>
-                    <button
-                      type="button"
-                      disabled={isSubmitting}
-                      className="btn-primary"
-                      onClick={() => setActiveRsvpModal('confirmed')}
-                    >
-                      {isSubmitting ? 'Procesando…' : '¡Sí, Asistiré!'}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isSubmitting}
-                      className="btn-secondary"
-                      onClick={() => setActiveRsvpModal('declined')}
-                    >
-                      No podré asistir
-                    </button>
-                  </div>
-                </form>
+                    <div className="field-group">
+                      <label className="field-label" style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <HeartIcon size={11} className="text-[#D4B778]"/>Mensaje a los novios
+                      </label>
+                      <textarea name="message" maxLength={250} rows={4} placeholder="Escribe tus mejores deseos…" className="field-textarea" />
+                      <p className="field-hint">Máx. 250 caracteres</p>
+                    </div>
+                    <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem', paddingTop:'0.5rem' }}>
+                      <button
+                        type="button"
+                        disabled={isSubmitting}
+                        className="btn-primary"
+                        onClick={() => setActiveRsvpModal('confirmed')}
+                      >
+                        {isSubmitting ? 'Procesando…' : '¡Sí, Asistiré!'}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSubmitting}
+                        className="btn-secondary"
+                        onClick={() => setActiveRsvpModal('declined')}
+                      >
+                        No podré asistir
+                      </button>
+                    </div>
+                  </form>
+                )}
                 {activeRsvpModal && (
                   <div className="confirm-modal-backdrop" onClick={() => setActiveRsvpModal(null)} role="dialog" aria-modal="true" aria-label="Confirmar respuesta">
                     <div className="confirm-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -702,8 +737,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .env-hint { font-family:var(--ff-b); font-size:9px; color:rgba(212,183,120,.28); letter-spacing:.2em; text-transform:uppercase; }
 
         /* Music FAB */
-        .music-fab { bottom:calc(24px + var(--safe-b)); right:18px; width:48px; height:48px; border-radius:50%; background:rgba(250,248,242,.93); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(168,149,107,.2); box-shadow:0 4px 20px rgba(0,0,0,.12); display:flex; align-items:center; justify-content:center; cursor:pointer; -webkit-tap-highlight-color:transparent; }
-        .music-fab-ring { position:absolute; inset:-4px; border-radius:50%; border:1px solid rgba(168,149,107,.15); animation:pulse-ring 3s ease-in-out infinite; }
+        .music-fab { bottom:calc(24px + var(--safe-b)); right:18px; width:auto; min-width:84px; padding:0 16px; height:44px; border-radius:24px; background:rgba(250,248,242,.93); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(168,149,107,.2); box-shadow:0 4px 20px rgba(0,0,0,.12); display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+        .music-fab-ring { position:absolute; inset:-4px; border-radius:28px; border:1px solid rgba(168,149,107,.15); animation:pulse-ring 3s ease-in-out infinite; }
         @keyframes pulse-ring { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:0;transform:scale(1.25)} }
         @keyframes spin { to{ transform:rotate(360deg); } }
         .spin-slow { animation:spin 6s linear infinite; display:block; }
@@ -838,8 +873,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .rsvp-title  { font-family:var(--ff-d); font-size:1.9rem; color:var(--olive); font-weight:300; }
         .rsvp-sub    { font-size:11px; color:var(--muted); }
         .rsvp-guest  { font-family:var(--ff-d); font-size:1.45rem; color:var(--olive); font-style:italic; margin-top:4px; word-break:break-word; }
-        .rsvp-deadline { margin:4px 0 18px; padding:10px 12px; background:linear-gradient(180deg,#F9F7F1,#F4F0E6); border:1px solid #E7E0D1; border-radius:2px; font-size:11px; color:#655C4B; line-height:1.55; text-align:center; }
-        .rsvp-deadline strong { color:#4A5D23; font-weight:600; }
+        .rsvp-deadline { display:flex; align-items:center; justify-content:center; gap:12px; margin:4px 0 24px; padding:16px; background:linear-gradient(180deg,#F4F7EB,#EAF0DA); border:1px solid #C9D6AD; border-radius:4px; font-size:12px; line-height:1.4; box-shadow:0 4px 12px -6px rgba(74,93,35,0.15); }
+        .rsvp-expired { margin-top:30px; padding:24px 20px; background:#FDFCF9; border:1px dashed #A8956B; border-radius:4px; text-align:center; color:#6C644F; font-size:13px; line-height:1.6; }
         .tickets-pill { background:var(--cream); border:1px solid var(--stone); padding:12px 16px; text-align:center; border-radius:2px; font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
         .tickets-note { margin-top:10px; font-size:11px; line-height:1.55; color:#7A705F; text-align:center; }
         .confirm-preview { margin-top:8px; font-size:12px; color:#6C644F; background:var(--cream); border:1px solid var(--stone); padding:9px 10px; border-radius:2px; text-align:center; }
