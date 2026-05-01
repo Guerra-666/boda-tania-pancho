@@ -1,9 +1,30 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { updateRsvp } from '@/actions/guests';
-import { QRCodeSVG } from 'qrcode.react';
+
+// ============================================================================
+// ⚠️ IMPORTACIONES REALES (PARA TU ENTORNO LOCAL)
+// Descomenta estas tres líneas en tu editor y borra los "MOCKS" de abajo:
+// ============================================================================
+// import { useRouter } from 'next/navigation';
+// import { QRCodeSVG } from 'qrcode.react';
+// import { updateRsvp } from '@/actions/guests';
+
+// ============================================================================
+// MOCKS PARA EL CANVAS (Borrar en tu código local)
+// ============================================================================
+const useRouter = () => ({ refresh: () => {} });
+const QRCodeSVG = ({ value, size, fgColor }: any) => (
+  <div style={{ width: size, height: size, border: `1px solid ${fgColor || '#000'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderRadius: '8px', padding: '10px' }}>
+    <span className="text-[10px] uppercase font-bold text-center opacity-50 tracking-widest">QR Simulado<br/>{value.substring(0,8)}</span>
+  </div>
+);
+const updateRsvp = async (formData: FormData) => {
+  return new Promise<{success?: boolean, error?: string}>((resolve) =>
+    setTimeout(() => resolve({ success: true }), 1500)
+  );
+};
+// ============================================================================
 
 // ── Iconos SVG en Línea
 const HeartIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
@@ -258,15 +279,15 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           {/* Hero content */}
           <div className="hero-content absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
             <div className="hero-eyebrow-row">
-              <div className="hero-rule" /><span className="hero-eyebrow">Nos Casamos</span><div className="hero-rule" />
+              <div className="hero-rule" /><span className="hero-eyebrow text-4xl">Nos Casamos</span><div className="hero-rule" />
             </div>
             <h1 className="hero-title">
               <span className="h-name an-1">Tania</span>
-              <span className="h-amp an-2">&</span>
+              <span className="h-amp an-2 font-serif italic text-[#D4B778]">Y</span>
               <span className="h-name an-3">Francisco</span>
             </h1>
             <div className="hero-divider an-4" />
-            <p className="hero-date an-5">10 · 10 · 26</p>
+            <p className="hero-date an-5">10 · 10 · 2026</p>
 
             {/* Cuenta Regresiva en Hero */}
             <div className="hero-countdown an-6">
@@ -376,7 +397,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-4">
                     <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H7v10a1 1 0 001 1h8a1 1 0 001-1V10h3.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>
                   </svg>
-                  <h3 className="dc-title">Dress Code</h3>
+                  <h3 className="dc-title">Código de Vestimenta</h3>
                   <p className="dc-sub">Etiqueta Formal</p>
                   <div className="dc-rule"/>
                   <p className="dc-body">Nos encantaría que nos acompañen luciendo su mejor estilo. Con mucho cariño, les sugerimos amablemente evitar los tonos blanco, rojo y verde olivo para mantener la armonía de la celebración.</p>
@@ -386,10 +407,10 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-4">
                     <path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/>
                   </svg>
-                  <h3 className="dc-title">Mesa de Regalos</h3>
+                  <h3 className="dc-title" style={{ fontSize: '1.4rem' }}>Su presencia es lo más importante</h3>
                   <p className="dc-sub">Lluvia de Sobres</p>
                   <div className="dc-rule"/>
-                  <p className="dc-body">Tu presencia es nuestro mejor regalo. Habrá un buzón en la recepción.</p>
+                  <p className="dc-body">Nuestra mayor alegría es que nos acompañen. Sin embargo, si desean tener un detalle con nosotros, contaremos con un buzón en la recepción; cualquier presente será profundamente agradecido.</p>
                 </div>
               </div>
             </div>
@@ -399,23 +420,15 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           <section className="mobile-sec-full sr no-print">
             <div className="gallery-head px-5">
               <p className="eyebrow">Nuestra Historia</p>
-              <p className="gallery-title">Capítulos de nuestro amor</p>
-              <p className="gallery-subtitle">Desliza y revive cada recuerdo especial</p>
+              <p className="gallery-title">Galería</p>
             </div>
             <div className="gallery-shell">
               <div ref={galleryRef} className="gallery-track hide-sb">
                 {PHOTOS.map((photo, idx) => (
                   <div key={idx} className={`gallery-slide ${idx===activeSlide ? 'is-active' : ''}`}>
                     <div className="gallery-frame">
-                      <img src={photo.src} alt={photo.label} className="gallery-img" loading="lazy" draggable={false} />
-                      <div className="gallery-caption-bar">
-                        <p className="gcb-num">{String(idx+1).padStart(2,'0')}</p>
-                        <div className="gcb-sep"/>
-                        <div>
-                          <p className="gcb-label">{photo.label}</p>
-                          <p className="gcb-year">{photo.year}</p>
-                        </div>
-                      </div>
+                      <img src={photo.src} alt="Nuestra foto" className="gallery-img" loading="lazy" draggable={false} />
+                      {/* Se eliminó la capa oscura con los textos sobre la imagen */}
                     </div>
                   </div>
                 ))}
@@ -522,10 +535,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                 <div className="tickets-pill">Pases disponibles: <strong className="ml-1 text-[#4A5D23]">{guest.ticketsTotal}</strong></div>
                 <p className="tickets-note">No hay pases extras. Solo se permitirá el acceso al número de personas confirmadas.</p>
 
-                {/* ================================================================ */}
-                {/* 🔴 AQUÍ ESTÁ EL CAMBIO PARA ARREGLAR EL ERROR DE VERCEL TYPE ERROR */}
-                {/* ================================================================ */}
-                <form ref={rsvpFormRef} action={handleRsvpAction} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
+                <form ref={rsvpFormRef} action={async (formData) => { await handleRsvpAction(formData); }} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
                   <input type="hidden" name="id" value={guest.id} />
                   <input ref={statusInputRef} type="hidden" name="status" defaultValue="confirmed" />
                   <div className="field-group">
@@ -613,7 +623,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400;1,600&family=Jost:wght@300;400;500;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
         :root {
@@ -649,10 +659,10 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .ticket-body { padding: 32px 20px; }
         .ticket-cutout {
           position: absolute;
-          top: 48px; /* alineado con la línea punteada */
+          top: 48px;
           width: 24px;
           height: 24px;
-          background: white; /* Color del fondo de la rsvp-card */
+          background: white;
           border-radius: 50%;
           border: 1px solid var(--stone);
           z-index: 10;
@@ -708,7 +718,10 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .hero-vignette { background:radial-gradient(ellipse at 50% 38%, rgba(255,255,255,.05) 0%, rgba(18,15,10,.2) 54%, rgba(18,15,10,.48) 100%); }
         .hero-eyebrow-row { display:flex; align-items:center; justify-content:center; gap:12px; animation:fade-up 1s .2s both; margin-bottom:20px; }
         .hero-rule { width:26px; height:1px; background:rgba(212,183,120,.62); }
-        .hero-eyebrow { font-family:var(--ff-b); font-size:clamp(9px,2.4vw,11px); letter-spacing:.44em; text-transform:uppercase; color:#D4B778; font-weight:500; text-shadow:0 2px 4px rgba(0,0,0,0.5); }
+
+        /* 🔴 CAMBIO: "Nos Casamos" mucho más grande y brillante */
+        .hero-eyebrow { font-family:var(--ff-b); font-size:clamp(14px,4vw,18px); letter-spacing:.5em; text-transform:uppercase; color:#D4B778; font-weight:700; text-shadow:0 3px 8px rgba(0,0,0,0.9); }
+
         .hero-bg-layer { z-index:0; }
         .hero-bg-slide { opacity:0; transition:opacity 1800ms cubic-bezier(.25,.46,.45,.94), transform 900ms ease-out; }
         .hero-bg-slide.is-active { opacity:1; }
@@ -718,7 +731,10 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .h-amp  { display:block; font-size:clamp(2rem,8.5vw,3.8rem); color:var(--gold-lt); font-style:italic; animation:fade-up 1.1s both; opacity:0; margin:4px 0; }
         .an-1{animation-delay:.1s} .an-2{animation-delay:.3s} .an-3{animation-delay:.5s} .an-4{animation-delay:.7s} .an-5{animation-delay:.9s} .an-6{animation-delay:1.1s}
         .hero-divider { width:1px; height:40px; background:linear-gradient(to bottom,transparent,rgba(212,183,120,.48),transparent); margin:16px auto; animation:fade-up 1s both; opacity:0; }
+
+        /* 🔴 CAMBIO: Fecha ajustada */
         .hero-date { display:inline-block; font-family:var(--ff-b); font-size:clamp(11px,3.6vw,14px); letter-spacing:.42em; text-transform:uppercase; color:rgba(253,252,249,.94); font-weight:500; animation:fade-up 1s both; opacity:0; text-shadow:0 5px 14px rgba(0,0,0,.4); padding:8px 10px 8px 14px; border:1px solid rgba(212,183,120,.42); border-radius:2px; background:rgba(212,183,120,.08); }
+
         .hero-countdown { animation:fade-up 1s both; opacity:0; margin-top:16px; }
         .hero-countdown-label { font-size:8px; letter-spacing:.34em; text-transform:uppercase; color:rgba(212,183,120,.86); margin-bottom:10px; text-align:center; }
         .hero-countdown-grid { display:flex; gap:14px; justify-content:center; }
@@ -773,11 +789,14 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .dark-card-overlay { position:absolute; inset:0; background:linear-gradient(160deg,rgba(22,20,12,.82),rgba(38,52,16,.78)); }
         .dark-card-body { position:relative; z-index:10; padding:48px 24px; display:flex; flex-direction:column; gap:36px; }
         .dc-item  { text-align:center; }
-        .dc-title { font-family:var(--ff-d); color:#F8F5EE; font-size:1.55rem; font-weight:300; margin-bottom:4px; }
-        .dc-sub   { font-size:8px; letter-spacing:.4em; text-transform:uppercase; color:rgba(212,183,120,.5); margin-bottom:14px; }
-        .dc-rule  { width:26px; height:1px; background:rgba(212,183,120,.25); margin:0 auto 14px; }
-        .dc-body  { font-size:13px; line-height:1.75; color:rgba(212,183,120,.45); font-weight:300; }
-        .dc-sep   { width:56px; height:1px; background:rgba(255,255,255,.06); margin:0 auto; }
+
+        /* 🔴 CAMBIO: Títulos y Texto más legible en tarjeta oscura */
+        .dc-title { font-family:var(--ff-d); color:#F8F5EE; font-size:clamp(1.4rem, 5vw, 1.6rem); font-weight:300; margin-bottom:4px; line-height:1.1; }
+        .dc-sub   { font-size:8px; letter-spacing:.4em; text-transform:uppercase; color:rgba(212,183,120,.8); margin-bottom:14px; }
+        .dc-rule  { width:26px; height:1px; background:rgba(212,183,120,.4); margin:0 auto 14px; }
+        .dc-body  { font-size:14px; line-height:1.65; color:rgba(250,248,242,0.9); font-weight:400; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+
+        .dc-sep   { width:56px; height:1px; background:rgba(255,255,255,.1); margin:0 auto; }
 
         /* Gallery */
         .gallery-head { text-align:center; margin-bottom:22px; }
@@ -792,15 +811,10 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .hide-sb { -ms-overflow-style:none; scrollbar-width:none; }
         .gallery-slide { min-width:calc(88vw - 16px); max-width:380px; flex-shrink:0; scroll-snap-align:center; opacity:.65; transform:scale(.965); transition:transform .4s ease, opacity .4s ease; }
         .gallery-slide.is-active { opacity:1; transform:scale(1); }
-        .gallery-frame { position:relative; aspect-ratio:4/5; border-radius:6px; overflow:hidden; background:var(--stone); border:1px solid rgba(212,183,120,.35); box-shadow:0 24px 44px -28px rgba(0,0,0,.5); }
-        .gallery-frame::before { content:''; position:absolute; inset:8px; border:1px solid rgba(253,252,249,.24); border-radius:4px; pointer-events:none; z-index:2; }
+        .gallery-frame { position:relative; aspect-ratio:4/5; border-radius:6px; overflow:hidden; background:var(--stone); border:1px solid rgba(212,183,120,.45); box-shadow:0 24px 44px -28px rgba(0,0,0,.5); }
+        .gallery-frame::before { content:''; position:absolute; inset:8px; border:1px solid rgba(253,252,249,.4); border-radius:4px; pointer-events:none; z-index:2; }
         .gallery-img   { width:100%; height:100%; object-fit:cover; display:block; transform:translateZ(0) scale(1.03); backface-visibility:hidden; transition:transform 1.2s ease; }
         .gallery-slide.is-active .gallery-img { transform:translateZ(0) scale(1.08); }
-        .gallery-caption-bar { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top,rgba(18,15,10,.85) 0%,rgba(18,15,10,.42) 62%,transparent 100%); padding:24px 18px 16px; display:flex; align-items:flex-end; gap:12px; z-index:3; }
-        .gcb-num   { font-family:var(--ff-d); font-size:2rem; font-weight:300; color:rgba(212,183,120,.65); line-height:1; flex-shrink:0; }
-        .gcb-sep   { width:1px; height:28px; background:rgba(255,255,255,.3); flex-shrink:0; }
-        .gcb-label { font-family:var(--ff-d); font-style:italic; font-size:1.06rem; color:rgba(253,252,249,.96); font-weight:300; line-height:1.2; }
-        .gcb-year  { font-size:8px; letter-spacing:.34em; color:rgba(212,183,120,.68); text-transform:uppercase; margin-top:4px; }
         .gallery-dots-wrap { position:relative; margin-top:18px; padding:0 16px; }
         .gallery-dots-line { width:100%; max-width:180px; height:1px; margin:0 auto; background:linear-gradient(to right, transparent, rgba(212,183,120,.36), transparent); }
         .gallery-dots { display:flex; justify-content:center; gap:10px; margin-top:-6px; }
