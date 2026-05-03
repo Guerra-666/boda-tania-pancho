@@ -9,16 +9,21 @@ export async function createGuest(formData: FormData) {
   const name = formData.get('name') as string;
   const phone = formData.get('phone') as string;
   const ticketsTotal = parseInt(formData.get('ticketsTotal') as string);
+  const tableNumberStr = formData.get('tableNumber') as string;
 
   if (!name || !phone || isNaN(ticketsTotal)) return { error: "Datos incompletos" };
 
   try {
+    // Si no eligen mesa, se queda en null (Sin asignar)
+    const tableNumber = tableNumberStr ? parseInt(tableNumberStr) : null;
+
     const id = crypto.randomUUID();
     await db.insert(guests).values({
       id,
       name,
       phone,
       ticketsTotal,
+      tableNumber, // Guardamos la mesa (manual o nula)
       status: 'pending',
     });
 
@@ -39,21 +44,25 @@ export async function deleteGuest(id: string) {
   }
 }
 
-// 🟢 AQUÍ ESTÁ LA FUNCIÓN QUE FALTABA PARA EDITAR INVITADOS
 export async function editGuest(formData: FormData) {
   const id = formData.get('id') as string;
   const name = formData.get('name') as string;
   const phone = formData.get('phone') as string;
   const ticketsTotal = parseInt(formData.get('ticketsTotal') as string);
+  const tableNumberStr = formData.get('tableNumber') as string;
 
   if (!id || !name || !phone || isNaN(ticketsTotal)) return { error: "Datos incompletos" };
 
   try {
+    // Si no eligen mesa, se queda en null (Sin asignar)
+    const tableNumber = tableNumberStr ? parseInt(tableNumberStr) : null;
+
     await db.update(guests)
       .set({
         name,
         phone,
         ticketsTotal,
+        tableNumber, // Actualizamos la mesa manual
         updatedAt: new Date().toISOString()
       })
       .where(eq(guests.id, id));
