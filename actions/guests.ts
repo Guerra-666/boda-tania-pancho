@@ -135,7 +135,8 @@ export async function validateQrAccess(guestId: string) {
     return {
       success: true,
       name: guest.name,
-      tickets: guest.ticketsConfirmed
+      tickets: guest.ticketsConfirmed,
+      table: guest.tableNumber
     };
   } catch (e) {
     return { success: false, message: "Error de conexión con la base de datos." };
