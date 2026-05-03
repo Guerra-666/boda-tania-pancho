@@ -19,12 +19,17 @@ import {
   AlertCircle,
   Edit,
   X,
-  Utensils
+  Utensils,
+  Filter
 } from 'lucide-react';
 
-export default async function DashboardPage() {
+export default async function DashboardPage(props: any) {
   // Obtenemos todos los invitados
   const allGuests = await db.select().from(guests);
+
+  // Manejo seguro de searchParams (Filtros de URL) compatible con Next 14 y 15
+  const searchParams = await props.searchParams;
+  const filterTable = searchParams?.table;
 
   // Obtenemos el dominio actual de forma dinámica y segura en el servidor
   const headersList = await headers();
@@ -32,7 +37,7 @@ export default async function DashboardPage() {
   const protocol = host.includes('localhost') ? 'http' : 'https';
   const baseUrl = `${protocol}://${host}`;
 
-  // Cálculos para las estadísticas
+  // Cálculos para las estadísticas (Siempre usan TODOS los invitados)
   const stats = {
     total: allGuests.reduce((acc, g: any) => acc + g.ticketsTotal, 0),
     confirmed: allGuests.reduce((acc, g: any) => acc + (g.status === 'confirmed' ? (g.ticketsConfirmed || 0) : 0), 0),
@@ -50,6 +55,24 @@ export default async function DashboardPage() {
       tableOccupancy[g.tableNumber] += g.ticketsTotal;
     }
   });
+
+  // --- ORDENAMIENTO (Por Mesa y Alfabético) ---
+  const sortedGuests = [...allGuests].sort((a, b) => {
+    const tableA = a.tableNumber ?? 999; // Los null van al final (999)
+    const tableB = b.tableNumber ?? 999;
+    if (tableA !== tableB) return tableA - tableB;
+    return a.name.localeCompare(b.name);
+  });
+
+  // --- FILTRADO ---
+  let displayedGuests = sortedGuests;
+  if (filterTable) {
+    if (filterTable === 'unassigned') {
+      displayedGuests = sortedGuests.filter(g => !g.tableNumber);
+    } else {
+      displayedGuests = sortedGuests.filter(g => g.tableNumber === parseInt(filterTable));
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F5EE] pb-20 md:pb-12 font-sans text-[#8A8275]">
@@ -144,24 +167,51 @@ export default async function DashboardPage() {
           </details>
         </div>
 
-        {/* LISTA DE INVITADOS - Formato GRID COMPACTO */}
+        {/* LISTA DE INVITADOS CON FILTRO */}
         <section>
-          <div className="flex items-center justify-between mb-3 px-1 border-b border-[#E8E4D8] pb-3">
-            <h2 className="text-xl font-serif text-[#4A5D23]">Lista de Invitados</h2>
-            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest bg-[#D4B778]/20 px-3 py-1 rounded-full text-[#4A5D23]">
-              {allGuests.length} Registros
-            </span>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 px-1 border-b border-[#E8E4D8] pb-4">
+
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl md:text-2xl font-serif text-[#4A5D23]">Lista de Invitados</h2>
+              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest bg-[#D4B778]/20 px-3 py-1 rounded-full text-[#4A5D23]">
+                {displayedGuests.length} Registros
+              </span>
+            </div>
+
+            {/* 🔴 BARRA DE FILTRADO POR MESA 🔴 */}
+            <form method="GET" className="flex items-center gap-2 w-full md:w-auto">
+              <Filter size={16} className="text-[#8A8275] hidden sm:block" />
+              <div className="flex w-full md:w-auto bg-white rounded-xl border border-[#E8E4D8] p-1.5 shadow-sm focus-within:ring-1 focus-within:ring-[#A8956B]">
+                <select name="table" defaultValue={filterTable || ''} className="w-full md:w-auto bg-transparent text-sm text-[#4A5D23] outline-none cursor-pointer pl-3 pr-2 py-2 md:py-1">
+                  <option value="">Todas las mesas</option>
+                  <option value="unassigned">Sin mesa asignada</option>
+                  {Array.from({ length: TOTAL_TABLES }, (_, i) => (
+                    <option key={`filter-table-${i+1}`} value={i+1}>Mesa {i+1}</option>
+                  ))}
+                </select>
+                <button type="submit" className="bg-[#4A5D23] text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-[#38461A] transition-colors ml-1">
+                  Filtrar
+                </button>
+              </div>
+            </form>
+
           </div>
 
-          {allGuests.length === 0 ? (
+          {displayedGuests.length === 0 ? (
             <div className="bg-white p-10 rounded-xl border border-[#E8E4D8] border-dashed text-center mt-3">
               <Users size={40} className="mx-auto text-[#D4B778] mb-3 opacity-50" />
-              <p className="text-[#8A8275] font-serif text-base">Aún no hay invitados registrados.</p>
-              <p className="text-[10px] mt-2 uppercase tracking-widest">Despliega el menú superior para comenzar</p>
+              <p className="text-[#8A8275] font-serif text-base">
+                {filterTable ? 'No hay invitados en esta categoría.' : 'Aún no hay invitados registrados.'}
+              </p>
+              {filterTable && (
+                <a href="/dashboard" className="inline-block mt-4 text-[10px] font-bold uppercase tracking-widest text-[#4A5D23] bg-[#D4B778]/20 px-4 py-2 rounded-full">
+                  Ver todas las mesas
+                </a>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 mt-3">
-              {allGuests.map((guest: any) => (
+              {displayedGuests.map((guest: any) => (
                 <React.Fragment key={guest.id}>
 
                   {/* MODAL DE EDICIÓN AISLADO */}
