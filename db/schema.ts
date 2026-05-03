@@ -28,6 +28,9 @@ export const guests = sqliteTable("guests", {
     .notNull(),
   validationTimestamp: text("validation_timestamp"),
 
+  // 🔴 NUEVO CAMPO: Mesa asignada al invitado
+  tableNumber: integer("table_number"),
+
   // Fechas automáticas
   createdAt: text("created_at")
     .default(sql`CURRENT_TIMESTAMP`)

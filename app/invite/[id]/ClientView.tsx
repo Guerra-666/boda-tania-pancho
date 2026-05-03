@@ -2,29 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-// ============================================================================
-// ⚠️ IMPORTACIONES REALES (PARA TU ENTORNO LOCAL)
-// Descomenta estas tres líneas en tu editor y borra los "MOCKS" de abajo:
-// ============================================================================
-// import { useRouter } from 'next/navigation';
-// import { QRCodeSVG } from 'qrcode.react';
-// import { updateRsvp } from '@/actions/guests';
-
-// ============================================================================
-// MOCKS PARA EL CANVAS (Borrar en tu código local)
-// ============================================================================
-const useRouter = () => ({ refresh: () => {} });
-const QRCodeSVG = ({ value, size, fgColor }: any) => (
-  <div style={{ width: size, height: size, border: `1px solid ${fgColor || '#000'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderRadius: '8px', padding: '10px' }}>
-    <span className="text-[10px] uppercase font-bold text-center opacity-50 tracking-widest">QR Simulado<br/>{value.substring(0,8)}</span>
-  </div>
-);
-const updateRsvp = async (formData: FormData) => {
-  return new Promise<{success?: boolean, error?: string}>((resolve) =>
-    setTimeout(() => resolve({ success: true }), 1500)
-  );
-};
-// ============================================================================
+import { useRouter } from 'next/navigation';
+import { QRCodeSVG } from 'qrcode.react';
+import { updateRsvp } from '@/actions/guests';
 
 // ── Iconos SVG en Línea
 const HeartIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
@@ -204,12 +184,6 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
     setIsPlaying(p => !p);
   };
 
-  const submitRsvp = (status: 'confirmed' | 'declined') => {
-    if (!statusInputRef.current || !rsvpFormRef.current) return;
-    statusInputRef.current.value = status;
-    rsvpFormRef.current.requestSubmit();
-  };
-
   const handleRsvpAction = async (formData: FormData) => {
     setIsSubmitting(true);
     const response = await updateRsvp(formData);
@@ -219,6 +193,14 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
     }
     router.refresh();
     setIsSubmitting(false);
+  };
+
+  const submitRsvp = (status: 'confirmed' | 'declined') => {
+    if (!rsvpFormRef.current) return;
+    const formData = new FormData(rsvpFormRef.current);
+    formData.set('status', status);
+    formData.set('id', guest.id);
+    handleRsvpAction(formData);
   };
 
   const unitLabel: Record<string, string> = { days: 'Días', hours: 'Hrs', minutes: 'Min', seconds: 'Seg' };
@@ -528,9 +510,19 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
                   <div className="ticket-body">
                     <p className="font-serif text-2xl text-[#4A5D23] mb-1">{guest.name}</p>
-                    <p className="text-[10px] uppercase tracking-widest text-[#8c8273] mb-6">
-                      Pases válidos: <strong className="text-[#4A5D23] text-sm">{guest.ticketsConfirmed}</strong>
-                    </p>
+
+                    {/* 🔴 LÓGICA AÑADIDA: Mostrar Pases y Mesa */}
+                    <div className="flex flex-row justify-center items-center gap-6 mt-3 mb-5">
+                      <div className="flex flex-col items-center">
+                        <span className="text-[9px] uppercase tracking-widest text-[#8c8273] mb-0.5">Pases</span>
+                        <strong className="text-[#4A5D23] text-lg leading-none">{guest.ticketsConfirmed}</strong>
+                      </div>
+                      <div className="w-px h-6 bg-[#E8E4D8]"></div>
+                      <div className="flex flex-col items-center">
+                        <span className="text-[9px] uppercase tracking-widest text-[#8c8273] mb-0.5">Mesa</span>
+                        <strong className="text-[#4A5D23] text-lg leading-none">{guest.tableNumber || 'Por asignar'}</strong>
+                      </div>
+                    </div>
 
                     <div className="qr-frame mx-auto mb-2">
                       <QRCodeSVG value={guest.id} size={150} fgColor="#3A4D1B" />
@@ -587,7 +579,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                     <p className="mt-3 font-bold">¡Muchas gracias por tu comprensión!</p>
                   </div>
                 ) : (
-                  <form ref={rsvpFormRef} action={async (formData) => { await handleRsvpAction(formData); }} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
+                  <form ref={rsvpFormRef} onSubmit={(e) => e.preventDefault()} className="mt-8" style={{ display:'flex', flexDirection:'column', gap:'1.75rem' }}>
                     <input type="hidden" name="id" value={guest.id} />
                     <input ref={statusInputRef} type="hidden" name="status" defaultValue="confirmed" />
                     <div className="field-group">

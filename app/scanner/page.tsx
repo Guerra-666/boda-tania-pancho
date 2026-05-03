@@ -1,16 +1,18 @@
 'use client'
 
 import { useState } from 'react';
-import { ArrowLeft, CheckCircle2, XCircle, AlertTriangle, ScanLine, Loader2, UserCheck, Users } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, AlertTriangle, ScanLine, Loader2, Users, Utensils } from 'lucide-react';
 
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { validateQrAccess } from '../../actions/guests';
 import Link from 'next/link';
+
 export default function ScannerPage() {
   const [result, setResult] = useState<{
     success: boolean;
     name?: string;
     tickets?: number | null;
+    table?: number | null; // 🔴 NUEVO CAMPO: Recibimos la mesa
     message?: string;
   } | null>(null);
 
@@ -134,14 +136,25 @@ export default function ScannerPage() {
                   </div>
 
                   <p className="text-[10px] uppercase tracking-widest text-[#8A8275] font-bold mb-2">Válido</p>
-                  <h2 className="text-3xl md:text-4xl font-serif text-[#4A5D23] mb-1 leading-tight">{result.name}</h2>
+                  <h2 className="text-3xl md:text-4xl font-serif text-[#4A5D23] mb-1 leading-tight">{result?.name}</h2>
 
-                  <div className="flex items-center justify-center gap-2 mt-6 mb-8">
-                    <div className="bg-[#4A5D23] text-white px-5 py-3 rounded-2xl flex items-center gap-3 shadow-md">
+                  {/* 🔴 NUEVO DISEÑO: Tarjetas de Pases y Mesas */}
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6 mb-8">
+                    {/* Tarjeta de Pases */}
+                    <div className="bg-[#4A5D23] text-white px-5 py-3 rounded-2xl flex items-center gap-3 shadow-md w-full sm:w-auto min-w-[160px]">
                       <Users size={24} className="opacity-80" />
                       <div className="text-left">
-                        <span className="block text-[9px] uppercase tracking-widest opacity-80">Pases Autorizados</span>
-                        <span className="block text-2xl font-serif font-bold leading-none">{result.tickets}</span>
+                        <span className="block text-[9px] uppercase tracking-widest opacity-80">Autorizados</span>
+                        <span className="block text-2xl font-serif font-bold leading-none">{result?.tickets}</span>
+                      </div>
+                    </div>
+
+                    {/* Tarjeta de Mesa */}
+                    <div className="bg-[#A8956B] text-white px-5 py-3 rounded-2xl flex items-center gap-3 shadow-md w-full sm:w-auto min-w-[160px]">
+                      <Utensils size={24} className="opacity-80" />
+                      <div className="text-left">
+                        <span className="block text-[9px] uppercase tracking-widest opacity-80">Mesa Asignada</span>
+                        <span className="block text-2xl font-serif font-bold leading-none">{result?.table || 'N/A'}</span>
                       </div>
                     </div>
                   </div>
@@ -156,10 +169,10 @@ export default function ScannerPage() {
                   </div>
 
                   <p className="text-[10px] uppercase tracking-widest text-[#d97706] font-bold mb-2">Código ya utilizado</p>
-                  <h2 className="text-2xl font-serif text-[#92400e] mb-4">{result.name || 'Invitado'}</h2>
+                  <h2 className="text-2xl font-serif text-[#92400e] mb-4">{result?.name || 'Invitado'}</h2>
 
                   <div className="bg-[#fffbeb] border border-[#fde68a] p-4 rounded-xl mb-8">
-                    <p className="text-sm font-medium text-[#b45309]">{result.message}</p>
+                    <p className="text-sm font-medium text-[#b45309]">{result?.message}</p>
                     <p className="text-xs text-[#d97706] mt-2">Denegar acceso o verificar identidad con el organizador.</p>
                   </div>
                 </div>
@@ -176,7 +189,7 @@ export default function ScannerPage() {
                   <h2 className="text-2xl font-serif text-[#991b1b] mb-4">Código Inválido</h2>
 
                   <div className="bg-[#fef2f2] border border-[#fecaca] p-4 rounded-xl mb-8">
-                    <p className="text-sm font-medium text-[#b91c1c]">{result.message}</p>
+                    <p className="text-sm font-medium text-[#b91c1c]">{result?.message}</p>
                   </div>
                 </div>
               )}

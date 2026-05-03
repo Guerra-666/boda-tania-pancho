@@ -1,3 +1,4 @@
+
 import { db } from '../../db';
 import { guests } from '../../db/schema';
 import { createGuest, deleteGuest, editGuest } from '../../actions/guests';
@@ -17,7 +18,8 @@ import {
   ScanLine,
   AlertCircle,
   Edit,
-  X
+  X,
+  Utensils
 } from 'lucide-react';
 
 export default async function DashboardPage() {
@@ -38,6 +40,17 @@ export default async function DashboardPage() {
     checkedIn: allGuests.reduce((acc, g: any) => acc + (g.qrValidated ? (g.ticketsConfirmed || 0) : 0), 0),
   };
 
+  // --- LÓGICA DE MESAS (15 Mesas, 10 personas máximo) ---
+  const TOTAL_TABLES = 15;
+  const SEATS_PER_TABLE = 10;
+  const tableOccupancy = new Array(TOTAL_TABLES + 1).fill(0);
+
+  allGuests.forEach((g: any) => {
+    if (g.tableNumber && g.tableNumber <= TOTAL_TABLES) {
+      tableOccupancy[g.tableNumber] += g.ticketsTotal;
+    }
+  });
+
   return (
     <div className="min-h-screen bg-[#F8F5EE] pb-20 md:pb-12 font-sans text-[#8A8275]">
 
@@ -46,7 +59,7 @@ export default async function DashboardPage() {
         <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
           <div className="text-center sm:text-left w-full sm:w-auto">
             <h1 className="text-2xl md:text-3xl font-serif text-[#4A5D23]">Panel de Invitados</h1>
-            <p className="text-[10px] md:text-xs text-[#8A8275] mt-0.5 uppercase tracking-widest font-bold">Gestión de Asistencia</p>
+            <p className="text-[10px] md:text-xs text-[#8A8275] mt-0.5 uppercase tracking-widest font-bold">Gestión de Asistencia y Mesas</p>
           </div>
 
           <a
@@ -79,29 +92,46 @@ export default async function DashboardPage() {
                 </div>
                 <div>
                   <h2 className="text-base md:text-lg font-serif text-[#4A5D23]">Añadir Nuevo Invitado</h2>
-                  <p className="text-[9px] uppercase tracking-widest text-[#8A8275] group-open:hidden">Toca para desplegar</p>
+                  <p className="text-[9px] uppercase tracking-widest text-[#8A8275] group-open:hidden">Toca para desplegar y asignar mesa</p>
                   <p className="text-[9px] uppercase tracking-widest text-[#A8956B] hidden group-open:block">Completar registro</p>
                 </div>
               </div>
             </summary>
 
             <div className="p-4 md:p-6 border-t border-[#E8E4D8] bg-[#F8F5EE]/30">
-              <form action={createGuest as any} className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-1">
+              <form action={async (formData) => { 'use server'; await createGuest(formData); }} className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="space-y-1 lg:col-span-1">
                     <label className="text-[9px] uppercase tracking-widest font-bold text-[#8A8275]">Nombre / Familia</label>
                     <input name="name" type="text" required className="w-full p-3 rounded-lg border border-[#E8E4D8] bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] transition-all text-sm text-[#4A5D23] shadow-sm" placeholder="Ej: Familia García" />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 lg:col-span-1">
                     <label className="text-[9px] uppercase tracking-widest font-bold text-[#8A8275]">WhatsApp (10 dígitos)</label>
                     <div className="relative">
                       <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8275]/50" />
                       <input name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} minLength={10} required className="w-full pl-10 p-3 rounded-lg border border-[#E8E4D8] bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] transition-all text-sm text-[#4A5D23] shadow-sm" placeholder="5512345678" title="Debe contener exactamente 10 dígitos numéricos" />
                     </div>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 lg:col-span-1">
                     <label className="text-[9px] uppercase tracking-widest font-bold text-[#8A8275]">Número de Pases</label>
                     <input name="ticketsTotal" type="number" inputMode="numeric" required min="1" className="w-full p-3 rounded-lg border border-[#E8E4D8] bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] transition-all text-sm text-[#4A5D23] shadow-sm" placeholder="Ej: 2" />
+                  </div>
+                  {/* SELECTOR DE MESA (ASIGNACIÓN MANUAL) */}
+                  <div className="space-y-1 lg:col-span-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-[#8A8275]">Asignar Mesa</label>
+                    <select name="tableNumber" className="w-full p-3 rounded-lg border border-[#E8E4D8] bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] transition-all text-sm text-[#4A5D23] shadow-sm cursor-pointer">
+                      <option value="">Sin asignar</option>
+                      {Array.from({ length: TOTAL_TABLES }, (_, i) => {
+                        const tableNum = i + 1;
+                        const freeSeats = SEATS_PER_TABLE - tableOccupancy[tableNum];
+                        const isFull = freeSeats <= 0;
+                        return (
+                          <option key={`create-table-${tableNum}`} value={tableNum} disabled={isFull}>
+                            Mesa {tableNum} {isFull ? '(Llena)' : `(${freeSeats} lugares libres)`}
+                          </option>
+                        );
+                      })}
+                    </select>
                   </div>
                 </div>
                 <div className="flex justify-end mt-1 md:mt-2">
@@ -157,21 +187,47 @@ export default async function DashboardPage() {
 
                         <h3 className="text-xl font-serif text-[#4A5D23] mb-4">Editar Invitado</h3>
 
-                        <form action={editGuest as any} className="flex flex-col gap-4 text-left">
+                        <form action={async (formData) => { 'use server'; await editGuest(formData); }} className="flex flex-col gap-4 text-left">
                           <input type="hidden" name="id" value={guest.id} />
                           <div className="space-y-1.5">
                             <label className="text-[10px] uppercase tracking-widest font-bold text-[#8A8275]">Nombre / Familia</label>
                             <input name="name" type="text" required defaultValue={guest.name} className="w-full p-3 rounded-xl border border-[#E8E4D8] bg-[#F8F5EE]/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] text-sm text-[#4A5D23]" />
                           </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] uppercase tracking-widest font-bold text-[#8A8275]">WhatsApp (10 dígitos)</label>
-                            <input name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} minLength={10} required defaultValue={guest.phone} className="w-full p-3 rounded-xl border border-[#E8E4D8] bg-[#F8F5EE]/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] text-sm text-[#4A5D23]" title="Debe contener exactamente 10 dígitos numéricos" />
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] uppercase tracking-widest font-bold text-[#8A8275]">WhatsApp</label>
+                              <input name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} minLength={10} required defaultValue={guest.phone} className="w-full p-3 rounded-xl border border-[#E8E4D8] bg-[#F8F5EE]/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] text-sm text-[#4A5D23]" title="Debe contener exactamente 10 dígitos numéricos" />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] uppercase tracking-widest font-bold text-[#8A8275]">Pases Totales</label>
+                              <input name="ticketsTotal" type="number" inputMode="numeric" required min={guest.status === 'confirmed' ? guest.ticketsConfirmed : 1} defaultValue={guest.ticketsTotal} className="w-full p-3 rounded-xl border border-[#E8E4D8] bg-[#F8F5EE]/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] text-sm text-[#4A5D23]" />
+                            </div>
                           </div>
+
+                          {/* RE-ASIGNAR MESA (MANUAL) */}
                           <div className="space-y-1.5">
-                            <label className="text-[10px] uppercase tracking-widest font-bold text-[#8A8275]">Pases Totales</label>
-                            <input name="ticketsTotal" type="number" inputMode="numeric" required min={guest.status === 'confirmed' ? guest.ticketsConfirmed : 1} defaultValue={guest.ticketsTotal} className="w-full p-3 rounded-xl border border-[#E8E4D8] bg-[#F8F5EE]/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] text-sm text-[#4A5D23]" />
-                            {guest.status === 'confirmed' && <p className="text-[9px] text-[#A8956B] mt-1">Este invitado ya confirmó {guest.ticketsConfirmed} pases.</p>}
+                            <label className="text-[10px] uppercase tracking-widest font-bold text-[#8A8275]">Re-asignar Mesa</label>
+                            <select name="tableNumber" defaultValue={guest.tableNumber || ''} className="w-full p-3 rounded-xl border border-[#E8E4D8] bg-[#F8F5EE]/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#A8956B] text-sm text-[#4A5D23] cursor-pointer">
+                              <option value="">Sin asignar</option>
+                              {Array.from({ length: TOTAL_TABLES }, (_, i) => {
+                                const tableNum = i + 1;
+                                // Descontamos la ocupación actual del invitado para ver los lugares libres reales si se queda en esta mesa
+                                const currentGuestOccupancy = guest.tableNumber === tableNum ? guest.ticketsTotal : 0;
+                                const freeSeats = SEATS_PER_TABLE - tableOccupancy[tableNum] + currentGuestOccupancy;
+                                const isFull = freeSeats <= 0 && guest.tableNumber !== tableNum;
+
+                                return (
+                                  <option key={`edit-table-${guest.id}-${tableNum}`} value={tableNum} disabled={isFull}>
+                                    Mesa {tableNum} {isFull ? '(Llena)' : `(${freeSeats} libres)`} {guest.tableNumber === tableNum ? ' - Mesa Actual' : ''}
+                                  </option>
+                                );
+                              })}
+                            </select>
                           </div>
+
+                          {guest.status === 'confirmed' && <p className="text-[9px] text-[#A8956B] mt-1">Este invitado ya confirmó {guest.ticketsConfirmed} pases.</p>}
+
                           <button type="submit" className="w-full bg-[#4A5D23] text-white font-bold py-3 rounded-xl hover:bg-[#38461A] transition-colors text-xs uppercase tracking-widest mt-2 shadow-md">
                             Guardar Cambios
                           </button>
@@ -187,10 +243,22 @@ export default async function DashboardPage() {
                     <div className="flex justify-between items-start mb-3.5">
                       <div className="pr-3">
                         <h3 className="font-serif text-base md:text-lg font-bold text-[#4A5D23] leading-tight line-clamp-2" title={guest.name}>{guest.name}</h3>
-                        <p className="text-[11px] text-[#8A8275] flex items-center gap-1 mt-1 font-medium">
-                          <Phone size={10} className="text-[#A8956B]" />
-                          {guest.phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')}
-                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-[11px] text-[#8A8275] flex items-center gap-1 font-medium">
+                            <Phone size={10} className="text-[#A8956B]" />
+                            {guest.phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')}
+                          </p>
+                          {/* INSIGNIA DE MESA */}
+                          {guest.tableNumber ? (
+                            <span className="flex items-center gap-1 bg-[#f0f5e5] border border-[#d4e4b9] text-[#4A5D23] px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">
+                              <Utensils size={10} /> Mesa {guest.tableNumber}
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1 bg-gray-100 border border-gray-200 text-gray-500 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">
+                              Sin Mesa
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex-shrink-0 mt-0.5">
                         <StatusBadge status={guest.status} />
