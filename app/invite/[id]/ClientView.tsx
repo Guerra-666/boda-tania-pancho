@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 // ============================================================================
 // ⚠️ IMPORTACIONES REALES (PARA TU ENTORNO LOCAL)
@@ -71,9 +71,33 @@ const MapPinIcon = ({ size = 16, className = '' }: { size?: number; className?: 
 
 interface Petal { id: number; left: number; delay: number; duration: number; size: number; opacity: number; rotation: number; }
 
-const PHOTOS = [
-  { src: "/tania.jpeg", label: "Nuestro primer atardecer", year: "2024" },
-  { src: "/pancho.jpeg", label: "Raíces de nuestro amor", year: "2025" },
+const HERO_PHOTOS: { src: string }[] = [
+  { src: "/img/arriba/IMG_20260329_095919-1.avif" },
+  { src: "/img/arriba/IMG_20260329_101230-1.avif" },
+  { src: "/img/arriba/IMG_20260329_105013-1.avif" },
+  { src: "/img/arriba/IMG_20260329_105102-1.avif" },
+  { src: "/img/arriba/IMG_20260329_105216_2.avif" },
+  { src: "/img/arriba/IMG_20260329_105327.avif" },
+  { src: "/img/arriba/IMG_20260329_105505_1.avif" },
+  { src: "/img/arriba/WhatsApp%20Image%202026-03-31%20at%207.57.20%20PM%20(4).avif" },
+  { src: "/img/arriba/WhatsApp%20Image%202026-03-31%20at%207.57.22%20PM%20(5).avif" },
+  { src: "/img/arriba/WhatsApp%20Image%202026-03-31%20at%207.57.27%20PM%20(1).avif" },
+];
+
+const GALLERY_PHOTOS: { src: string }[] = [
+  { src: "/img/abajo/IMG_20260329_100318.avif" },
+  { src: "/img/abajo/IMG_20260329_100323.avif" },
+  { src: "/img/abajo/IMG_20260329_105144.avif" },
+  { src: "/img/abajo/IMG_20260329_105336.avif" },
+  { src: "/img/abajo/IMG-20260403-WA0063.avif" },
+  { src: "/img/abajo/IMG-20260403-WA0137.avif" },
+  { src: "/img/abajo/IMG-20260403-WA0139.avif" },
+  { src: "/img/abajo/IMG-20260403-WA0159.avif" },
+  { src: "/img/abajo/motion_photo_4311895888568107400.avif" },
+  { src: "/img/abajo/motion_photo_6912731440127331405.avif" },
+  { src: "/img/abajo/motion_photo_6912731440127331405~2.avif" },
+  { src: "/img/abajo/motion_photo_7779101812823950672~2.avif" },
+  { src: "/img/abajo/WhatsApp%20Image%202026-03-31%20at%207.57.34%20PM.avif" },
 ];
 
 const MOCK_WISHES = [
@@ -96,6 +120,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const [ticketsSelection, setTicketsSelection] = useState(1);
   const [activeRsvpModal, setActiveRsvpModal] = useState<'confirmed' | 'declined' | null>(null);
   const [isRsvpExpired, setIsRsvpExpired]   = useState(false);
+  const [wishesPerPage, setWishesPerPage] = useState(1);
 
   const audioRef   = useRef<HTMLAudioElement>(null);
   const heroRef    = useRef<HTMLDivElement>(null);
@@ -118,6 +143,18 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
       duration: 9 + Math.random() * 7, size: 7 + Math.random() * 10,
       opacity: 0.25 + Math.random() * 0.35, rotation: Math.random() * 360,
     })));
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const update = () => setWishesPerPage(mq.matches ? 2 : 1);
+    update();
+    if (mq.addEventListener) {
+      mq.addEventListener('change', update);
+      return () => mq.removeEventListener('change', update);
+    }
+    mq.addListener(update);
+    return () => mq.removeListener(update);
   }, []);
 
   useEffect(() => {
@@ -147,8 +184,9 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
   useEffect(() => {
     if (!isEnvelopeOpen) return;
+    if (HERO_PHOTOS.length <= 1) return;
     const id = setInterval(() => {
-      setHeroSlide(prev => (prev + 1) % PHOTOS.length);
+      setHeroSlide(prev => (prev + 1) % HERO_PHOTOS.length);
     }, 5200);
     return () => clearInterval(id);
   }, [isEnvelopeOpen]);
@@ -169,9 +207,9 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
   useEffect(() => {
     const el = galleryRef.current;
-    if (!el) return;
+    if (!el || GALLERY_PHOTOS.length === 0) return;
     const onScroll = () => {
-      const itemW = el.scrollWidth / PHOTOS.length;
+      const itemW = el.scrollWidth / GALLERY_PHOTOS.length;
       setActiveSlide(Math.round(el.scrollLeft / itemW));
     };
     el.addEventListener('scroll', onScroll, { passive: true });
@@ -180,8 +218,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
   const scrollToSlide = useCallback((idx: number) => {
     const el = galleryRef.current;
-    if (!el) return;
-    const itemW = el.scrollWidth / PHOTOS.length;
+    if (!el || GALLERY_PHOTOS.length === 0) return;
+    const itemW = el.scrollWidth / GALLERY_PHOTOS.length;
     el.scrollTo({ left: itemW * idx, behavior: 'smooth' });
   }, []);
 
@@ -220,6 +258,14 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   };
 
   const unitLabel: Record<string, string> = { days: 'Días', hours: 'Hrs', minutes: 'Min', seconds: 'Seg' };
+  const wishPages = useMemo(() => {
+    if (!messages || messages.length === 0) return [] as { name: string; text: string }[][];
+    const pages: { name: string; text: string }[][] = [];
+    for (let i = 0; i < messages.length; i += wishesPerPage) {
+      pages.push(messages.slice(i, i + wishesPerPage));
+    }
+    return pages;
+  }, [messages, wishesPerPage]);
 
   return (
     <>
@@ -277,7 +323,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         {/* HERO */}
         <section ref={heroRef} className="relative w-full overflow-hidden no-print" style={{ height: '100dvh' }}>
           <div className="hero-bg-layer absolute inset-0">
-            {PHOTOS.map((photo, idx) => (
+            {HERO_PHOTOS.map((photo, idx) => (
               <div
                 key={`hero-${photo.src}-${idx}`}
                 className={`hero-bg-slide absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform ${idx === heroSlide ? 'is-active' : ''}`}
@@ -300,27 +346,33 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           ))}
           {/* Hero content */}
           <div className="hero-content absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
-            <div className="hero-eyebrow-row">
-              <div className="hero-rule" /><span className="hero-eyebrow text-4xl">Nos Casamos</span><div className="hero-rule" />
+            <div className="hero-top">
+              <div className="hero-eyebrow-row">
+                <div className="hero-rule" /><span className="hero-eyebrow text-4xl">Nos Casamos</span><div className="hero-rule" />
+              </div>
             </div>
-            <h1 className="hero-title">
-              <span className="h-name an-1">Tania</span>
-              <span className="h-amp an-2 font-serif italic text-[#D4B778]">Y</span>
-              <span className="h-name an-3">Francisco</span>
-            </h1>
-            <div className="hero-divider an-4" />
-            <p className="hero-date an-5">10 · 10 · 2026</p>
+            <div className="hero-mid">
+              <h1 className="hero-title">
+                <span className="h-name an-1">Tania</span>
+                <span className="h-amp an-2 font-serif italic text-[#D4B778]">Y</span>
+                <span className="h-name an-3">Francisco</span>
+              </h1>
+            </div>
+            <div className="hero-bottom">
+              <div className="hero-divider an-4" />
+              <p className="hero-date an-5">10 · 10 · 2026</p>
 
-            {/* Cuenta Regresiva en Hero */}
-            <div className="hero-countdown an-6">
-              <p className="hero-countdown-label">Faltan para el gran día</p>
-              <div className="hero-countdown-grid">
-                {Object.entries(timeLeft).map(([u, v]) => (
-                  <div key={u} className="hero-count-cell">
-                    <div className="hero-count-num">{String(v).padStart(2,'0')}</div>
-                    <div className="hero-count-unit">{unitLabel[u]}</div>
-                  </div>
-                ))}
+              {/* Cuenta Regresiva en Hero */}
+              <div className="hero-countdown an-6">
+                <p className="hero-countdown-label">Faltan para el gran día</p>
+                <div className="hero-countdown-grid">
+                  {Object.entries(timeLeft).map(([u, v]) => (
+                    <div key={u} className="hero-count-cell">
+                      <div className="hero-count-num">{String(v).padStart(2,'0')}</div>
+                      <div className="hero-count-unit">{unitLabel[u]}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -599,54 +651,76 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           </section>
 
           {/* GALLERY */}
-          <section className="mobile-sec-full sr no-print">
-            <div className="gallery-head px-5">
-              <p className="eyebrow">Nuestra Historia</p>
-              <p className="gallery-title">Galería</p>
-            </div>
-            <div className="gallery-shell">
-              <div ref={galleryRef} className="gallery-track hide-sb">
-                {PHOTOS.map((photo, idx) => (
-                  <div key={idx} className={`gallery-slide ${idx===activeSlide ? 'is-active' : ''}`}>
-                    <div className="gallery-frame">
-                      <img src={photo.src} alt="Nuestra foto" className="gallery-img" loading="lazy" draggable={false} />
+          {GALLERY_PHOTOS.length > 0 && (
+            <section className="mobile-sec-full sr no-print">
+              <div className="gallery-head px-5">
+                <p className="eyebrow">Nuestra Historia</p>
+                <p className="gallery-title">Galería</p>
+              </div>
+              <div className="gallery-shell">
+                <div ref={galleryRef} className="gallery-track hide-sb">
+                  {GALLERY_PHOTOS.map((photo, idx) => (
+                    <div key={idx} className={`gallery-slide ${idx===activeSlide ? 'is-active' : ''}`}>
+                      <div className="gallery-frame">
+                        <img src={photo.src} alt="Nuestra foto" className="gallery-img" loading="lazy" draggable={false} />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="gallery-dots-wrap">
-              <div className="gallery-dots-line" />
-              <div className="gallery-dots">
-                {PHOTOS.map((_,idx) => (
-                  <button key={idx} onClick={() => scrollToSlide(idx)} className={`gallery-dot ${idx===activeSlide?'active':''}`} aria-label={`Foto ${idx+1}`} />
-                ))}
+              <div className="gallery-dots-wrap">
+                <div className="gallery-dots-line" />
+                <div className="gallery-dots">
+                  {GALLERY_PHOTOS.map((_,idx) => (
+                    <button key={idx} onClick={() => scrollToSlide(idx)} className={`gallery-dot ${idx===activeSlide?'active':''}`} aria-label={`Foto ${idx+1}`} />
+                  ))}
+                </div>
               </div>
-            </div>
-            <p className="swipe-hint gallery-swipe-hint">Desliza para ver más</p>
-          </section>
+              {GALLERY_PHOTOS.length > 1 && (
+                <p className="swipe-hint gallery-swipe-hint">Desliza para ver más</p>
+              )}
+            </section>
+          )}
 
           {/* ══ MURO DE LOS DESEOS (GUESTBOOK) ══ */}
           {messages && messages.length > 0 && (
             <section className="mobile-sec-full sr no-print">
-              <div className="dark-card">
+              <div className="dark-card wishes-card">
                 <div className="dark-card-overlay" style={{ background: 'linear-gradient(160deg, #1A1710 0%, #2A3618 100%)' }} />
 
-                <div className="relative z-10 flex flex-col items-center justify-center w-full h-full py-12">
-                  <p className="eyebrow mb-10 text-[rgba(212,183,120,0.8)]">Muro de los Deseos</p>
+                <div className="wishes-shell">
+                  <p className="eyebrow text-[rgba(212,183,120,0.8)]">Muro de los Deseos</p>
 
-                  <div className="wishes-track hide-sb">
-                    {messages.map((msg, idx) => (
-                      <div key={idx} className="wish-card">
-                        <QuoteFilledIcon size={28} className="text-[#A8956B] opacity-30 mb-6" />
-                        <p className="wish-text">"{msg.text}"</p>
-                        <div className="wish-sep" />
-                        <p className="wish-author">{msg.name}</p>
+                  <div className={`wishes-rail hide-sb ${wishPages.length === 1 ? 'is-single' : ''}`}>
+                    {wishPages.map((page, pageIdx) => (
+                      <div key={`wish-page-${pageIdx}`} className="wish-page">
+                        <div className="wish-orn">
+                          <div className="wish-orn-line" />
+                          <div className="wish-orn-diamond" />
+                          <div className="wish-orn-line" />
+                        </div>
+                        <div className="wish-stack">
+                          {page.map((msg, idx) => (
+                            <div key={`wish-${pageIdx}-${idx}`} className="wish-card">
+                              <QuoteFilledIcon size={28} className="text-[#A8956B] opacity-30 mb-6" />
+                              <p className="wish-text">"{msg.text}"</p>
+                              <div className="wish-sep" />
+                              <p className="wish-author">{msg.name}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="wish-orn">
+                          <div className="wish-orn-line" />
+                          <div className="wish-orn-diamond" />
+                          <div className="wish-orn-line" />
+                        </div>
                       </div>
                     ))}
                   </div>
 
-                  <p className="swipe-hint mt-8" style={{ color: 'rgba(212,183,120,0.5)' }}>Desliza para leer más</p>
+                  {wishPages.length > 1 && (
+                    <p className="swipe-hint mt-4" style={{ color: 'rgba(212,183,120,0.5)' }}>Desliza para leer más</p>
+                  )}
                 </div>
               </div>
             </section>
@@ -937,6 +1011,9 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .hero-bg-slide { opacity:0; transition:opacity 1800ms cubic-bezier(.25,.46,.45,.94), transform 900ms ease-out; }
         .hero-bg-slide.is-active { opacity:1; }
         .hero-content { justify-content:center; padding-top:0; }
+        .hero-top { position:absolute; left:0; right:0; top:clamp(28px, 6vh, 44px); display:flex; justify-content:center; }
+        .hero-mid { display:flex; flex-direction:column; align-items:center; }
+        .hero-bottom { position:absolute; left:0; right:0; bottom:calc(80px + var(--safe-b)); display:flex; flex-direction:column; align-items:center; gap:10px; }
         .hero-title { font-family:var(--ff-d); font-size:clamp(3.2rem,14vw,6.6rem); font-weight:300; color:#FDFCF9; line-height:.92; letter-spacing:-.01em; display:flex; flex-direction:column; align-items:center; text-shadow:0 12px 28px rgba(0,0,0,.32); }
         .h-name { display:block; animation:fade-up 1.1s both; opacity:0; }
         .h-amp  { display:block; font-size:clamp(2rem,8.5vw,3.8rem); color:var(--gold-lt); font-style:italic; animation:fade-up 1.1s both; opacity:0; margin:4px 0; }
@@ -1029,8 +1106,16 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .swipe-hint { font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:rgba(168,149,107,.38); text-align:center; margin-top:12px; padding:0 16px; }
 
         /* Wishes Wall */
-        .wishes-track { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; gap:16px; padding:0 24px; width: 100%; }
-        .wish-card { min-width:calc(85vw - 32px); max-width:420px; flex-shrink:0; scroll-snap-align:center; background:rgba(253,252,249,0.02); border:1px solid rgba(212,183,120,0.1); padding:48px 32px; display:flex; flex-direction:column; align-items:center; text-align:center; border-radius:12px; }
+        .wishes-card { min-height:72dvh; }
+        .wishes-shell { position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:space-between; width:100%; height:100%; padding:36px 0 28px; gap:16px; }
+        .wishes-rail { width:100%; flex:1; min-height:0; display:flex; flex-direction:column; gap:18px; overflow-y:auto; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; padding:0 22px; }
+        .wishes-rail.is-single { overflow-y:hidden; }
+        .wish-page { scroll-snap-align:start; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:8px 0; }
+        .wish-stack { display:flex; flex-direction:column; gap:14px; align-items:center; width:100%; }
+        .wish-orn { display:flex; align-items:center; justify-content:center; gap:10px; }
+        .wish-orn-line { width:46px; height:1px; background:rgba(212,183,120,0.35); }
+        .wish-orn-diamond { width:6px; height:6px; background:rgba(212,183,120,0.5); transform:rotate(45deg); }
+        .wish-card { width:100%; max-width:420px; background:rgba(253,252,249,0.03); border:1px solid rgba(212,183,120,0.14); padding:40px 28px; display:flex; flex-direction:column; align-items:center; text-align:center; border-radius:14px; box-shadow:0 18px 38px -28px rgba(0,0,0,0.5); }
         .wish-text { font-family:var(--ff-d); font-size:1.35rem; font-style:italic; color:#FDFCF9; line-height:1.6; font-weight:300; }
         .wish-sep { width:32px; height:1px; background:rgba(212,183,120,0.25); margin:24px 0; }
         .wish-author { font-family:var(--ff-b); font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold-lt); font-weight:500; }
@@ -1097,6 +1182,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         /* Desktop enhancements */
         @media (min-width:768px) {
           .hero-content { justify-content:center; padding-top:0; }
+          .hero-top { top:clamp(36px, 6vh, 52px); }
+          .hero-bottom { bottom:calc(90px + var(--safe-b)); gap:14px; }
           .hero-eyebrow-row { gap:14px; margin-bottom:22px; }
           .hero-rule { width:34px; }
           .hero-date { font-size:14px; }
@@ -1115,8 +1202,11 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           .rsvp-card { padding:3rem 3rem; }
           .mobile-sec { padding:0 32px; }
           .corner-frame { width:28px; height:28px; }
-          .wishes-track { padding:0 48px; gap:24px; justify-content: flex-start; }
-          .wish-card { min-width:360px; padding:56px 40px; }
+          .wishes-card { min-height:68dvh; }
+          .wishes-shell { padding:48px 0 40px; }
+          .wishes-rail { padding:0 48px; gap:22px; }
+          .wish-page { padding:10px 0; }
+          .wish-card { padding:46px 36px; }
           .confirm-modal-backdrop { align-items:center; padding:24px; }
           .confirm-modal-card { padding:26px 22px 20px; }
         }
