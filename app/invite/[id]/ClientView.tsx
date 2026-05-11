@@ -2,9 +2,29 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-import { useRouter } from 'next/navigation';
-import { QRCodeSVG } from 'qrcode.react';
-import { updateRsvp } from '@/actions/guests';
+// ============================================================================
+// ⚠️ IMPORTACIONES REALES (PARA TU ENTORNO LOCAL)
+// Descomenta estas tres líneas en tu editor y borra los "MOCKS" de abajo:
+// ============================================================================
+// import { useRouter } from 'next/navigation';
+// import { QRCodeSVG } from 'qrcode.react';
+// import { updateRsvp } from '@/actions/guests';
+
+// ============================================================================
+// MOCKS PARA EL CANVAS (Borrar en tu código local)
+// ============================================================================
+const useRouter = () => ({ refresh: () => {} });
+const QRCodeSVG = ({ value, size, fgColor }: any) => (
+  <div style={{ width: size, height: size, border: `1px solid ${fgColor || '#000'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderRadius: '8px', padding: '10px' }}>
+    <span className="text-[10px] uppercase font-bold text-center opacity-50 tracking-widest">QR Simulado<br/>{value.substring(0,8)}</span>
+  </div>
+);
+const updateRsvp = async (formData: FormData) => {
+  return new Promise<{success?: boolean, error?: string}>((resolve) =>
+    setTimeout(() => resolve({ success: true }), 1500)
+  );
+};
+// ============================================================================
 
 // ── Iconos SVG en Línea
 const HeartIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
@@ -15,11 +35,6 @@ const HeartIcon = ({ size = 24, className = '' }: { size?: number; className?: s
 const CheckIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-  </svg>
-);
-const DiscIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
   </svg>
 );
 const PlayIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
@@ -37,11 +52,6 @@ const CalendarIcon = ({ size = 24, className = '' }: { size?: number; className?
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
   </svg>
 );
-const ArrowIcon = ({ size = 16, className = '' }: { size?: number; className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M5 12h14M12 5l7 7-7 7"/>
-  </svg>
-);
 const ChevronDownIcon = ({ size = 16, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <polyline points="6 9 12 15 18 9"/>
@@ -50,6 +60,12 @@ const ChevronDownIcon = ({ size = 16, className = '' }: { size?: number; classNa
 const QuoteFilledIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
     <path d="M14.017 18L14.017 10.609C14.017 4.905 17.748 1.039 23 0L23.995 2.151C21.563 3.068 20 5.789 20 8H24V18H14.017ZM0 18V10.609C0 4.905 3.748 1.039 9 0L9.996 2.151C7.563 3.068 6 5.789 6 8H9.983L9.983 18L0 18Z"/>
+  </svg>
+);
+const MapPinIcon = ({ size = 16, className = '' }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+    <circle cx="12" cy="10" r="3" />
   </svg>
 );
 
@@ -94,7 +110,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const isDeclined  = guest.status === 'declined';
 
   useEffect(() => {
-    // 🔴 Bloqueo de confirmación a partir del 16 de Agosto de 2026 (Media noche)
+    // Bloqueo de confirmación a partir del 16 de Agosto de 2026
     setIsRsvpExpired(new Date() >= new Date('2026-08-16T00:00:00'));
 
     setPetals(Array.from({ length: 14 }, (_, i) => ({
@@ -319,94 +335,189 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
         <main className="content-bg flex flex-col items-center">
 
-          {/* 🔴 SECCIÓN UNIFICADA: CITA, PADRES Y LUGARES DEL EVENTO 🔴 */}
-          <section className="mobile-sec sr no-print" style={{ paddingTop: '20px' }}>
-            <div className="flex flex-col justify-center h-full gap-10 md:gap-16">
+          {/* 🔴 SECCIÓN 1: CITA Y PADRES (Pantalla Completa Bien Distribuida) 🔴 */}
+          <section
+            className="sr text-center no-print w-full max-w-[540px] mx-auto"
+            style={{
+              padding: '72px 28px 64px',
+              minHeight: '100dvh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 0,
+            }}
+          >
+            {/* Adorno Superior */}
+            <div className="flex items-center gap-4 w-full" style={{ marginBottom: '40px' }}>
+              <div className="flex-1 h-px opacity-60" style={{ background: 'linear-gradient(to right, transparent, #D4B778)' }} />
+              <HeartIcon size={14} className="text-[#D4B778] flex-shrink-0" style={{ strokeWidth: 1.5 }} />
+              <div className="flex-1 h-px opacity-60" style={{ background: 'linear-gradient(to left, transparent, #D4B778)' }} />
+            </div>
 
-              {/* Parte Superior: Cita y Padres */}
-              <div className="text-center">
-                <div className="orn-row"><div className="orn-l"/><HeartIcon size={11} className="text-[#D4B778]"/><div className="orn-l"/></div>
-                <blockquote className="quote-text mt-6 mb-8">"Nuestro amor ha crecido con cada día compartido y ahora queremos sellarlo con una promesa eterna.
-                "</blockquote>
-                <br></br>
-                <br></br>
-                  Nos llenaría de felicidad contar con tu presencia en este día tan especial.
-                <br></br>
-                <br></br>
-                <br></br>
-                <br></br>
-                <p className="eyebrow mb-6">Con la bendición de nuestros padres</p>
-                <br></br>
+            {/* Frase */}
+            <blockquote
+              className="font-serif italic text-[#4A5D23] leading-[1.52] text-center font-light text-balance w-full"
+              style={{ fontSize: 'clamp(1.4rem, 5.5vw, 1.75rem)', marginBottom: '18px' }}
+            >
+              "Nuestro amor ha crecido con cada día compartido y ahora queremos sellarlo con una promesa eterna."
+            </blockquote>
 
-                <div className="parents-grid">
-                  <div className="parent-col">
-                    <p className="parent-name">María de los Angeles Becerril Samperio</p>
-                  </div>
-                  <div className="parent-divider-mobile" />
-                  <div className="parent-col">
-                    <p className="parent-name">Damaceno Quezada Guzmán</p>
-                    <div className="parent-dot"/>
-                    <p className="parent-name">Praxedis Santillán López</p>
-                  </div>
-                </div>
+            <p
+              className="font-serif italic text-[#655C4B] font-light text-balance text-center w-full"
+              style={{ fontSize: 'clamp(1rem, 4vw, 1.2rem)', lineHeight: 1.6, marginBottom: '48px' }}
+            >
+              Nos llenaría de felicidad contar con tu presencia en este día tan especial.
+            </p>
+
+            {/* Padres */}
+            <p className="text-[8px] uppercase tracking-[0.38em] text-[#A8956B] font-bold text-center" style={{ marginBottom: '28px' }}>
+              Con la bendición de nuestros padres
+            </p>
+
+            <div className="flex flex-col items-center w-full" style={{ gap: '14px' }}>
+              <p
+                className="font-serif text-[#4A5D23] font-light text-center leading-[1.3] text-balance"
+                style={{ fontSize: 'clamp(1.2rem, 5vw, 1.45rem)' }}
+              >
+                María de los Angeles Becerril Samperio
+              </p>
+
+              <div className="flex items-center gap-4" style={{ margin: '6px 0' }}>
+                <div className="h-px opacity-40" style={{ width: 56, background: '#D4B778' }} />
+                <div className="w-2 h-2 rotate-45 opacity-60" style={{ background: '#D4B778', flexShrink: 0 }} />
+                <div className="h-px opacity-40" style={{ width: 56, background: '#D4B778' }} />
               </div>
 
-              {/* Parte Inferior: Lugares del Evento */}
-              <div className="w-full max-w-[500px] mx-auto">
-                <p className="eyebrow mb-6 text-center">El Gran Día</p>
-                <div style={{ display:'flex', flexDirection:'column' }}>
-                  <div className="venue-card">
-                    <div className="venue-accent" />
-                    <div className="venue-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-[#A8956B]">
-                        <path d="M12 3v4" />
-                        <path d="M9.5 5h5" />
-                        <path d="M6 10.5l6-4 6 4" />
-                        <path d="M7 10.5V19" />
-                        <path d="M17 10.5V19" />
-                        <path d="M9.5 19v-4.5h5V19" />
-                        <path d="M5 19h14" />
-                      </svg>
-                    </div>
-                    <div className="venue-body">
-                      <p className="venue-type">Ceremonia Religiosa</p>
-                      <p className="venue-name">Parroquia San Jose</p>
-                      <p className="venue-time">2:00 pm</p>
-                    </div>
-                    <a href="https://maps.app.goo.gl/Z8q1SishVrgxWSAF9?g_st=aw" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
-                      <ArrowIcon size={15} />
-                    </a>
-                  </div>
+              <p
+                className="font-serif text-[#4A5D23] font-light text-center leading-[1.3] text-balance"
+                style={{ fontSize: 'clamp(1.2rem, 5vw, 1.45rem)' }}
+              >
+                Damaceno Quezada Guzmán
+              </p>
+              <p
+                className="font-serif text-[#4A5D23] font-light text-center leading-[1.3] text-balance"
+                style={{ fontSize: 'clamp(1.2rem, 5vw, 1.45rem)' }}
+              >
+                Praxedis Santillán López
+              </p>
+            </div>
 
-                  <div className="venue-connector">
-                    <div style={{ width:1, height:12, background:'#E8E4D8' }}/>
-                    <div style={{ width:5, height:5, borderRadius:'50%', border:'1px solid #D4B778', background:'#F8F5EE', margin:'0 -1px' }}/>
-                    <div style={{ width:1, height:12, background:'#E8E4D8' }}/>
-                  </div>
+            {/* Adorno Inferior */}
+            <div className="flex items-center gap-4 w-full" style={{ marginTop: '44px' }}>
+              <div className="flex-1 h-px opacity-50" style={{ background: 'linear-gradient(to right, transparent, #D4B778)' }} />
+              <HeartIcon size={14} className="text-[#D4B778] flex-shrink-0" style={{ strokeWidth: 1.5 }} />
+              <div className="flex-1 h-px opacity-50" style={{ background: 'linear-gradient(to left, transparent, #D4B778)' }} />
+            </div>
+          </section>
 
-                  <div className="venue-card">
-                    <div className="venue-accent" />
-                    <div className="venue-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-[#A8956B]">
-                        <path d="M4 10h16" />
-                        <path d="M6 10V7l6-3 6 3v3" />
-                        <path d="M7 10v8" />
-                        <path d="M17 10v8" />
-                        <path d="M10 18v-3.5a2 2 0 0 1 4 0V18" />
-                        <path d="M5 18h14" />
-                      </svg>
-                    </div>
-                    <div className="venue-body">
-                      <p className="venue-type">Boda Civil y Recepción</p>
-                      <p className="venue-name">Finca los Arcos</p>
-                      <p className="venue-time">3:30 pm</p>
-                    </div>
-                    <a href="https://maps.app.goo.gl/XEX2knTRz3nnYEy87?g_st=aw" target="_blank" rel="noreferrer" className="venue-cta" aria-label="Ver mapa">
-                      <ArrowIcon size={15} />
-                    </a>
-                  </div>
+          {/* 🔴 SECCIÓN 2: LUGARES DEL EVENTO (DISEÑO PERFECTO Y RESPIRADO) 🔴 */}
+          <section
+            className="sr flex flex-col items-center w-full no-print"
+            style={{ padding: '56px 20px 64px', minHeight: '100dvh', justifyContent: 'center' }}
+          >
+            {/* Header */}
+            <div className="flex items-center gap-4 w-full" style={{ marginBottom: '44px' }}>
+              <div className="flex-1 h-px opacity-60" style={{ background: 'linear-gradient(to right, transparent, #D4B778)' }} />
+              <p className="text-[9px] uppercase tracking-[0.42em] text-[#A8956B] font-bold text-center flex-shrink-0">El Gran Día</p>
+              <div className="flex-1 h-px opacity-60" style={{ background: 'linear-gradient(to left, transparent, #D4B778)' }} />
+            </div>
+
+            {/* Tarjeta 1 */}
+            <div
+              className="w-full bg-white border border-[#E8E4D8] overflow-hidden group transition-shadow hover:shadow-lg"
+              style={{ borderRadius: 24, boxShadow: '0 8px 28px -12px rgba(0,0,0,.1)' }}
+            >
+              <div className="flex flex-col items-center" style={{ padding: '36px 24px 24px' }}>
+                <div
+                  className="flex items-center justify-center text-[#A8956B] border border-[#E8E4D8] bg-[#F8F5EE] transition-transform group-hover:scale-105"
+                  style={{ width: 72, height: 72, borderRadius: '50%', marginBottom: 20 }}
+                >
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2v3" /><path d="M10.5 3.5h3" /><path d="M12 5l-8 6v11h16V11l-8-6z" /><path d="M10 22v-5h4v5" />
+                  </svg>
+                </div>
+                <p className="text-[8px] uppercase tracking-[0.38em] text-[#A8956B] font-bold text-center" style={{ marginBottom: 10 }}>Ceremonia Religiosa</p>
+                <h3
+                  className="font-serif text-[#4A5D23] font-light text-center leading-tight text-balance"
+                  style={{ fontSize: 'clamp(1.85rem, 7vw, 2.3rem)', marginBottom: 10 }}
+                >
+                  Parroquia San Jose
+                </h3>
+                <p
+                  className="font-serif italic text-[#8A8275] text-center text-balance"
+                  style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 24, maxWidth: 240 }}
+                >
+                  Av. Constitución #123, Centro Histórico
+                </p>
+                <div className="flex items-center gap-4 w-full">
+                  <div className="flex-1 h-px bg-[#E8E4D8]" />
+                  <span className="font-serif text-[#4A5D23] font-light" style={{ fontSize: 'clamp(1.65rem, 6.5vw, 2rem)', whiteSpace: 'nowrap' }}>
+                    2:00 pm
+                  </span>
+                  <div className="flex-1 h-px bg-[#E8E4D8]" />
                 </div>
               </div>
+              <a
+                href="https://maps.app.goo.gl/Z8q1SishVrgxWSAF9?g_st=aw"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-2 border-t border-[#E8E4D8] bg-[#F8F5EE] hover:bg-[#E8E4D8] transition-colors text-[#4A5D23] font-bold uppercase"
+                style={{ padding: '18px 24px', fontSize: 9, letterSpacing: '0.28em' }}
+              >
+                <MapPinIcon size={14} /> Ver Ubicación
+              </a>
+            </div>
+
+            {/* Conector */}
+            <div className="flex items-center justify-center" style={{ padding: '22px 0' }}>
+              <div className="w-2.5 h-2.5 rotate-45 bg-[#D4B778] opacity-50" />
+            </div>
+
+            {/* Tarjeta 2 */}
+            <div
+              className="w-full bg-white border border-[#E8E4D8] overflow-hidden group transition-shadow hover:shadow-lg"
+              style={{ borderRadius: 24, boxShadow: '0 8px 28px -12px rgba(0,0,0,.1)' }}
+            >
+              <div className="flex flex-col items-center" style={{ padding: '36px 24px 24px' }}>
+                <div
+                  className="flex items-center justify-center text-[#A8956B] border border-[#E8E4D8] bg-[#F8F5EE] transition-transform group-hover:scale-105"
+                  style={{ width: 72, height: 72, borderRadius: '50%', marginBottom: 20 }}
+                >
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 21h18" /><path d="M5 21V9l7-6 7 6v12" /><path d="M10 21v-5h4v5" /><path d="M9 11h.01M15 11h.01" />
+                  </svg>
+                </div>
+                <p className="text-[8px] uppercase tracking-[0.38em] text-[#A8956B] font-bold text-center" style={{ marginBottom: 10 }}>Boda Civil y Recepción</p>
+                <h3
+                  className="font-serif text-[#4A5D23] font-light text-center leading-tight text-balance"
+                  style={{ fontSize: 'clamp(1.85rem, 7vw, 2.3rem)', marginBottom: 10 }}
+                >
+                  Finca los Arcos
+                </h3>
+                <p
+                  className="font-serif italic text-[#8A8275] text-center text-balance"
+                  style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 24, maxWidth: 240 }}
+                >
+                  Carretera a la Finca Km 4.5, Valle Verde
+                </p>
+                <div className="flex items-center gap-4 w-full">
+                  <div className="flex-1 h-px bg-[#E8E4D8]" />
+                  <span className="font-serif text-[#4A5D23] font-light" style={{ fontSize: 'clamp(1.65rem, 6.5vw, 2rem)', whiteSpace: 'nowrap' }}>
+                    3:30 pm
+                  </span>
+                  <div className="flex-1 h-px bg-[#E8E4D8]" />
+                </div>
+              </div>
+              <a
+                href="https://maps.app.goo.gl/XEX2knTRz3nnYEy87?g_st=aw"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-2 border-t border-[#E8E4D8] bg-[#F8F5EE] hover:bg-[#E8E4D8] transition-colors text-[#4A5D23] font-bold uppercase"
+                style={{ padding: '18px 24px', fontSize: 9, letterSpacing: '0.28em' }}
+              >
+                <MapPinIcon size={14} /> Ver Ubicación
+              </a>
             </div>
           </section>
 
@@ -417,7 +528,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
               <div className="dark-card-overlay" />
               <div className="dark-card-body">
                 <div className="dc-item">
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-6">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-6">
                     <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H7v10a1 1 0 001 1h8a1 1 0 001-1V10h3.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>
                   </svg>
                   <h3 className="dc-title">Código de Vestimenta</h3>
@@ -429,13 +540,13 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                 <div className="dc-sep" />
 
                 <div className="dc-item">
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-6">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-[#D4B778] mx-auto mb-6">
                     <path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/>
                   </svg>
-                  <h3 className="dc-title" style={{ fontSize: 'clamp(1.4rem, 5.5vw, 1.8rem)' }}>Su presencia es lo más importante</h3>
+                  <h3 className="dc-title" style={{ fontSize: 'clamp(1.5rem, 6vw, 1.8rem)' }}>Su presencia es lo más importante</h3>
                   <p className="dc-sub">Mesa de regalos</p>
                   <div className="dc-rule"/>
-                  <p className="dc-body">El que nos acompañen es lo mas importante para nostros. Sin embargo, lo que salga de su corazon sera bien recibido en el nuestro.</p>
+                  <p className="dc-body">El que nos acompañen es lo más importante para nosotros. Sin embargo, lo que salga de su corazón será bien recibido en el nuestro.</p>
                 </div>
               </div>
             </div>
@@ -511,7 +622,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   <div className="ticket-body">
                     <p className="font-serif text-2xl text-[#4A5D23] mb-1">{guest.name}</p>
 
-                    {/* 🔴 LÓGICA AÑADIDA: Mostrar Pases y Mesa */}
+                    {/* LÓGICA AÑADIDA: Mostrar Pases y Mesa */}
                     <div className="flex flex-row justify-center items-center gap-6 mt-3 mb-5">
                       <div className="flex flex-col items-center">
                         <span className="text-[9px] uppercase tracking-widest text-[#8c8273] mb-0.5">Pases</span>
@@ -809,26 +920,6 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         /* Quote */
         .quote-text { font-family:var(--ff-d); font-style:italic; font-size:clamp(1.5rem,5.5vw,2rem); color:var(--olive); line-height:1.55; font-weight:300; text-wrap:balance; }
 
-        /* Parents */
-        .parents-grid { display:flex; flex-direction:column; align-items:center; gap:0; }
-        .parent-col  { text-align:center; display:flex; flex-direction:column; align-items:center; gap:4px; padding:14px 0; }
-        .parent-name { font-family:var(--ff-d); color:var(--olive); font-size:1.05rem; font-weight:300; }
-        .parent-dot  { width:4px; height:4px; border-radius:50%; background:var(--gold-lt); opacity:.5; margin:4px 0; }
-        .parent-divider-mobile { width:40px; height:1px; background:var(--stone); margin:4px 0; }
-
-        /* Venues */
-        .venue-card { display:grid; grid-template-columns:44px minmax(0,1fr) 40px; align-items:center; column-gap:12px; background:white; padding:14px 13px; border:1px solid var(--stone); border-radius:16px; position:relative; overflow:hidden; -webkit-tap-highlight-color:transparent; box-shadow:0 10px 26px -18px rgba(0,0,0,.3); }
-        .venue-accent { position:absolute; top:0; left:0; bottom:0; width:2px; background:linear-gradient(to bottom,transparent,var(--gold-lt),transparent); opacity:.35; transition:opacity .3s; }
-        .venue-card:active .venue-accent { opacity:1; }
-        .venue-icon { width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#F8F5EE; border:1px solid #EFE8D9; border-radius:50%; }
-        .venue-body { min-width:0; }
-        .venue-type { font-size:8px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); margin-bottom:3px; }
-        .venue-name { font-family:var(--ff-d); color:var(--olive); font-size:clamp(1.16rem, 4.8vw, 1.32rem); font-weight:300; line-height:1.15; }
-        .venue-time { font-size:11px; color:var(--muted); margin-top:4px; letter-spacing:.08em; }
-        .venue-cta  { width:40px; height:40px; border-radius:50%; background:var(--cream); border:1px solid var(--stone); display:flex; align-items:center; justify-content:center; color:var(--olive); text-decoration:none; -webkit-tap-highlight-color:transparent; box-shadow:0 6px 16px -12px rgba(0,0,0,.35); }
-        .venue-cta:active { background:var(--olive); color:white; border-color:var(--olive); }
-        .venue-connector { display:flex; align-items:center; justify-content:flex-start; height:34px; padding-left:21px; }
-
         /* 🔴 Dark card ACTUALIZADA 🔴 */
         .dark-card {
           position:relative; overflow:hidden; border:1px solid rgba(212,183,120,.13);
@@ -950,6 +1041,13 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .sr { opacity:0; transform:translateY(32px); transition:opacity 1s cubic-bezier(.25,.46,.45,.94),transform 1s cubic-bezier(.25,.46,.45,.94); }
         .sr-active { opacity:1; transform:translateY(0); }
 
+        @media (max-width: 420px) {
+          .content-bg section.no-print {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+          }
+        }
+
         /* Desktop enhancements */
         @media (min-width:768px) {
           .hero-content { justify-content:center; padding-top:0; }
@@ -959,10 +1057,6 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           .hero-countdown-grid { gap:26px; }
           .hero-count-cell { min-width:64px; }
           .hero-count-num { font-size:2.7rem; }
-          .venue-card { grid-template-columns:46px minmax(0,1fr) 44px; padding:18px 16px; column-gap:14px; }
-          .venue-icon { width:46px; height:46px; }
-          .venue-cta { width:44px; height:44px; }
-          .venue-connector { padding-left:24px; }
           .dark-card { margin:0 auto; max-width: 900px; border-radius: 32px; }
           .dark-card-body  { flex-direction:row; gap:0; padding:56px 48px; }
           .dc-sep  { width:1px; height:auto; margin:0 44px; }
@@ -972,9 +1066,6 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           .gallery-slide   { min-width:320px; }
           .gallery-track   { padding:0 32px; gap:18px; }
           .gallery-dots-wrap { margin-top:20px; }
-          .parents-grid    { flex-direction:row; align-items:flex-start; gap:0; }
-          .parent-divider-mobile { width:1px; height:56px; margin:0 24px; }
-          .venue-cta:hover { background:var(--olive); color:white; border-color:var(--olive); }
           .rsvp-card { padding:3rem 3rem; }
           .mobile-sec { padding:0 32px; }
           .corner-frame { width:28px; height:28px; }
