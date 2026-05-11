@@ -337,74 +337,120 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
 
           {/* 🔴 SECCIÓN 1: CITA Y PADRES (Pantalla Completa Bien Distribuida) 🔴 */}
           <section
-            className="sr text-center no-print w-full max-w-[540px] mx-auto"
+            className="sr text-center no-print w-full max-w-[560px] mx-auto"
             style={{
-              padding: '72px 28px 64px',
+              padding: '64px 24px 56px',
               minHeight: '100dvh',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 0,
+              gap: '26px',
             }}
           >
-            {/* Adorno Superior */}
-            <div className="flex items-center gap-4 w-full" style={{ marginBottom: '40px' }}>
+            <div className="flex items-center gap-4 w-full" style={{ marginBottom: '6px' }}>
               <div className="flex-1 h-px opacity-60" style={{ background: 'linear-gradient(to right, transparent, #D4B778)' }} />
               <HeartIcon size={14} className="text-[#D4B778] flex-shrink-0" style={{ strokeWidth: 1.5 }} />
               <div className="flex-1 h-px opacity-60" style={{ background: 'linear-gradient(to left, transparent, #D4B778)' }} />
             </div>
 
-            {/* Frase */}
-            <blockquote
-              className="font-serif italic text-[#4A5D23] leading-[1.52] text-center font-light text-balance w-full"
-              style={{ fontSize: 'clamp(1.4rem, 5.5vw, 1.75rem)', marginBottom: '18px' }}
+            <div
+              className="w-full"
+              style={{
+                maxWidth: 520,
+                background: 'linear-gradient(180deg, #FEFDFB 0%, #F5F1E7 100%)',
+                border: '1px solid #E8E4D8',
+                borderRadius: 18,
+                padding: '26px 22px 24px',
+                boxShadow: '0 18px 40px -30px rgba(0,0,0,0.22)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
             >
-              "Nuestro amor ha crecido con cada día compartido y ahora queremos sellarlo con una promesa eterna."
-            </blockquote>
-
-            <p
-              className="font-serif italic text-[#655C4B] font-light text-balance text-center w-full"
-              style={{ fontSize: 'clamp(1rem, 4vw, 1.2rem)', lineHeight: 1.6, marginBottom: '48px' }}
-            >
-              Nos llenaría de felicidad contar con tu presencia en este día tan especial.
-            </p>
-
-            {/* Padres */}
-            <p className="text-[8px] uppercase tracking-[0.38em] text-[#A8956B] font-bold text-center" style={{ marginBottom: '28px' }}>
-              Con la bendición de nuestros padres
-            </p>
-
-            <div className="flex flex-col items-center w-full" style={{ gap: '14px' }}>
-              <p
-                className="font-serif text-[#4A5D23] font-light text-center leading-[1.3] text-balance"
-                style={{ fontSize: 'clamp(1.2rem, 5vw, 1.45rem)' }}
-              >
-                María de los Angeles Becerril Samperio
-              </p>
-
-              <div className="flex items-center gap-4" style={{ margin: '6px 0' }}>
-                <div className="h-px opacity-40" style={{ width: 56, background: '#D4B778' }} />
-                <div className="w-2 h-2 rotate-45 opacity-60" style={{ background: '#D4B778', flexShrink: 0 }} />
-                <div className="h-px opacity-40" style={{ width: 56, background: '#D4B778' }} />
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(120deg, transparent 0%, rgba(212,183,120,0.12) 42%, transparent 70%)',
+                  opacity: 0.5,
+                  pointerEvents: 'none',
+                }}
+              />
+              <div className="relative" style={{ zIndex: 1 }}>
+                <div className="flex items-center justify-center gap-3" style={{ marginBottom: '14px' }}>
+                  <div className="h-px" style={{ width: 40, background: '#D4B778', opacity: 0.5 }} />
+                  <HeartIcon size={12} className="text-[#D4B778]" style={{ strokeWidth: 1.6 }} />
+                  <div className="h-px" style={{ width: 40, background: '#D4B778', opacity: 0.5 }} />
+                </div>
+                <blockquote
+                  className="font-serif italic text-[#4A5D23] leading-[1.52] text-center font-light text-balance"
+                  style={{ fontSize: 'clamp(1.35rem, 5.4vw, 1.75rem)', marginBottom: '14px' }}
+                >
+                  "Nuestro amor ha crecido con cada día compartido y ahora queremos sellarlo con una promesa eterna."
+                </blockquote>
+                <p
+                  className="font-serif italic text-[#655C4B] font-light text-balance text-center"
+                  style={{ fontSize: 'clamp(1rem, 4vw, 1.2rem)', lineHeight: 1.6 }}
+                >
+                  Nos llenaría de felicidad contar con tu presencia en este día tan especial.
+                </p>
+                <div className="flex items-center justify-center gap-3" style={{ marginTop: '16px' }}>
+                  <div className="h-px" style={{ width: 52, background: '#D4B778', opacity: 0.35 }} />
+                  <div className="w-2 h-2 rotate-45" style={{ background: '#D4B778', opacity: 0.55 }} />
+                  <div className="h-px" style={{ width: 52, background: '#D4B778', opacity: 0.35 }} />
+                </div>
               </div>
-
-              <p
-                className="font-serif text-[#4A5D23] font-light text-center leading-[1.3] text-balance"
-                style={{ fontSize: 'clamp(1.2rem, 5vw, 1.45rem)' }}
-              >
-                Damaceno Quezada Guzmán
-              </p>
-              <p
-                className="font-serif text-[#4A5D23] font-light text-center leading-[1.3] text-balance"
-                style={{ fontSize: 'clamp(1.2rem, 5vw, 1.45rem)' }}
-              >
-                Praxedis Santillán López
-              </p>
             </div>
 
-            {/* Adorno Inferior */}
-            <div className="flex items-center gap-4 w-full" style={{ marginTop: '44px' }}>
+            <div className="flex items-center justify-center gap-3" style={{ margin: '2px 0' }}>
+              <div className="h-px" style={{ width: 60, background: '#D4B778', opacity: 0.35 }} />
+              <div className="w-2 h-2 rotate-45" style={{ background: '#D4B778', opacity: 0.55 }} />
+              <div className="h-px" style={{ width: 60, background: '#D4B778', opacity: 0.35 }} />
+            </div>
+
+            <div
+              className="w-full"
+              style={{
+                maxWidth: 480,
+                background: 'linear-gradient(180deg, #FFFFFF 0%, #F8F5EE 100%)',
+                border: '1px solid #E8E4D8',
+                borderRadius: 16,
+                padding: '24px 20px',
+                boxShadow: '0 16px 36px -30px rgba(0,0,0,0.2)',
+              }}
+            >
+              <p className="text-[8px] uppercase tracking-[0.38em] text-[#A8956B] font-bold text-center" style={{ marginBottom: '18px' }}>
+                Con la bendición de nuestros padres
+              </p>
+              <div className="flex flex-col items-center" style={{ gap: '12px' }}>
+                <p
+                  className="font-serif text-[#4A5D23] font-light text-center leading-[1.3] text-balance"
+                  style={{ fontSize: 'clamp(1.2rem, 5vw, 1.45rem)' }}
+                >
+                  María de los Angeles Becerril Samperio
+                </p>
+                <div className="flex items-center gap-3" style={{ margin: '4px 0' }}>
+                  <div className="h-px" style={{ width: 56, background: '#D4B778', opacity: 0.4 }} />
+                  <div className="w-2 h-2 rotate-45" style={{ background: '#D4B778', opacity: 0.6, flexShrink: 0 }} />
+                  <div className="h-px" style={{ width: 56, background: '#D4B778', opacity: 0.4 }} />
+                </div>
+                <p
+                  className="font-serif text-[#4A5D23] font-light text-center leading-[1.3] text-balance"
+                  style={{ fontSize: 'clamp(1.2rem, 5vw, 1.45rem)' }}
+                >
+                  Damaceno Quezada Guzmán
+                </p>
+                <p
+                  className="font-serif text-[#4A5D23] font-light text-center leading-[1.3] text-balance"
+                  style={{ fontSize: 'clamp(1.2rem, 5vw, 1.45rem)' }}
+                >
+                  Praxedis Santillán López
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 w-full" style={{ marginTop: '6px' }}>
               <div className="flex-1 h-px opacity-50" style={{ background: 'linear-gradient(to right, transparent, #D4B778)' }} />
               <HeartIcon size={14} className="text-[#D4B778] flex-shrink-0" style={{ strokeWidth: 1.5 }} />
               <div className="flex-1 h-px opacity-50" style={{ background: 'linear-gradient(to left, transparent, #D4B778)' }} />
