@@ -18,7 +18,7 @@ const getBaseUrl = () => {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-  return 'http://localhost:3000';
+  return undefined;
 };
 
 export async function generateMetadata({
@@ -35,9 +35,10 @@ export async function generateMetadata({
   const description = guest?.name
     ? `Estas invitado a nuestra boda, ${guest.name}. Abre la invitacion y confirma tu asistencia.`
     : 'Estas invitado a nuestra boda. Abre la invitacion y confirma tu asistencia.';
+  const ogImage = '/tania.jpeg';
 
   return {
-    metadataBase: new URL(baseUrl),
+    metadataBase: baseUrl ? new URL(baseUrl) : undefined,
     title,
     description,
     openGraph: {
@@ -46,7 +47,7 @@ export async function generateMetadata({
       url: `/invite/${id}`,
       images: [
         {
-          url: '/img/arriba/IMG_20260329_095919-1.avif'
+          url: ogImage
         }
       ]
     },
@@ -54,7 +55,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/img/arriba/IMG_20260329_095919-1.avif']
+      images: [ogImage]
     }
   };
 }
