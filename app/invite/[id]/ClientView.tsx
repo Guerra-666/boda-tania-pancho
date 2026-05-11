@@ -2,29 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
-// ============================================================================
-// ⚠️ IMPORTACIONES REALES (PARA TU ENTORNO LOCAL)
-// Descomenta estas tres líneas en tu editor y borra los "MOCKS" de abajo:
-// ============================================================================
-// import { useRouter } from 'next/navigation';
-// import { QRCodeSVG } from 'qrcode.react';
-// import { updateRsvp } from '@/actions/guests';
-
-// ============================================================================
-// MOCKS PARA EL CANVAS (Borrar en tu código local)
-// ============================================================================
-const useRouter = () => ({ refresh: () => {} });
-const QRCodeSVG = ({ value, size, fgColor }: any) => (
-  <div style={{ width: size, height: size, border: `1px solid ${fgColor || '#000'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderRadius: '8px', padding: '10px' }}>
-    <span className="text-[10px] uppercase font-bold text-center opacity-50 tracking-widest">QR Simulado<br/>{value.substring(0,8)}</span>
-  </div>
-);
-const updateRsvp = async (formData: FormData) => {
-  return new Promise<{success?: boolean, error?: string}>((resolve) =>
-    setTimeout(() => resolve({ success: true }), 1500)
-  );
-};
-// ============================================================================
+import { useRouter } from 'next/navigation';
+import { QRCodeSVG } from 'qrcode.react';
+import { updateRsvp } from '@/actions/guests';
 
 // ── Iconos SVG en Línea
 const HeartIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
