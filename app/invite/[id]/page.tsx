@@ -35,7 +35,7 @@ export async function generateMetadata({
   const description = guest?.name
     ? `Estas invitado a nuestra boda, ${guest.name}. Abre la invitacion y confirma tu asistencia.`
     : 'Estas invitado a nuestra boda. Abre la invitacion y confirma tu asistencia.';
-  const ogImage = '/tania.jpeg';
+  const ogImage = '/Open.png';
 
   return {
     metadataBase: baseUrl ? new URL(baseUrl) : undefined,
@@ -44,10 +44,14 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
+      type: 'website',
       url: `/invite/${id}`,
       images: [
         {
-          url: ogImage
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: 'Invitacion de boda de Tania y Francisco'
         }
       ]
     },
@@ -55,7 +59,12 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: [ogImage]
+      images: [
+        {
+          url: ogImage,
+          alt: 'Invitacion de boda de Tania y Francisco'
+        }
+      ]
     }
   };
 }

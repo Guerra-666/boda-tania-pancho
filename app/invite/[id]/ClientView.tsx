@@ -528,7 +528,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   className="font-serif italic text-[#8A8275] text-center text-balance"
                   style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 24, maxWidth: 240 }}
                 >
-                  Av. Constitución #123, Centro Histórico
+                  Av Piracantos S/N, Piracantos, 42088 Pachuca de Soto, Hgo.
                 </p>
                 <div className="flex items-center gap-4 w-full">
                   <div className="flex-1 h-px bg-[#E8E4D8]" />
@@ -579,7 +579,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                   className="font-serif italic text-[#8A8275] text-center text-balance"
                   style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 24, maxWidth: 240 }}
                 >
-                  Carretera a la Finca Km 4.5, Valle Verde
+                  Av. Ferrocarril Hidalgo No. 4, San Antonio el Desmonte, 42080 Pachuca de Soto, Hgo.
                 </p>
                 <div className="flex items-center gap-4 w-full">
                   <div className="flex-1 h-px bg-[#E8E4D8]" />

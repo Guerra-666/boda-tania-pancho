@@ -52,11 +52,11 @@ export default function HomePage() {
         </div>
 
         <h1 className="text-6xl md:text-8xl font-serif text-white mb-6 drop-shadow-lg" style={{ fontWeight: 300, lineHeight: 1.1 }}>
-          Tania <span className="text-[#D4B778] italic">&</span> Francisco
+          Tania <span className="text-[#D4B778] italic">Y</span> Francisco
         </h1>
 
         <p className="text-sm md:text-base uppercase tracking-[0.4em] text-white/90 mb-12">
-          10 • Octubre • 2026
+          10 • 10 • 2026
         </p>
 
         {/* Mensaje Informativo Elegante */}
