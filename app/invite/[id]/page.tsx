@@ -18,7 +18,7 @@ const getBaseUrl = () => {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-  return undefined;
+  return 'https://boda-tania-francisco.vercel.app';
 };
 
 export async function generateMetadata({
@@ -29,23 +29,25 @@ export async function generateMetadata({
   const { id } = await params;
   const guest = await getGuest(id);
   const baseUrl = getBaseUrl();
+  const base = new URL(baseUrl);
   const title = guest?.name
     ? `Tania & Francisco | Invitacion para ${guest.name}`
     : 'Tania & Francisco | Invitacion';
   const description = guest?.name
     ? `Estas invitado a nuestra boda, ${guest.name}. Abre la invitacion y confirma tu asistencia.`
     : 'Estas invitado a nuestra boda. Abre la invitacion y confirma tu asistencia.';
-  const ogImage = '/Open.png';
+  const ogImage = new URL('/Open.png', base).toString();
+  const pageUrl = new URL(`/invite/${id}`, base).toString();
 
   return {
-    metadataBase: baseUrl ? new URL(baseUrl) : undefined,
+    metadataBase: base,
     title,
     description,
     openGraph: {
       title,
       description,
       type: 'website',
-      url: `/invite/${id}`,
+      url: pageUrl,
       images: [
         {
           url: ogImage,
