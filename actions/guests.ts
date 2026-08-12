@@ -118,7 +118,13 @@ export async function validateQrAccess(guestId: string) {
     }
 
     if (guest.qrValidated) {
-      const hora = guest.validationTimestamp ? new Date(guest.validationTimestamp).toLocaleTimeString() : 'antes';
+      const hora = guest.validationTimestamp
+        ? new Date(guest.validationTimestamp).toLocaleTimeString('es-MX', {
+            timeZone: 'America/Mexico_City',
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : 'antes';
       return { success: false, message: `¡ALERTA! Este QR ya ingresó a las ${hora}.` };
     }
 
