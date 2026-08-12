@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from 'react';
+import { useState, useEffect, useRef, useCallback, type CSSProperties } from 'react';
 
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
@@ -101,11 +101,12 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const [ticketsSelection, setTicketsSelection] = useState(1);
   const [activeRsvpModal, setActiveRsvpModal] = useState<'confirmed' | 'declined' | null>(null);
   const [isRsvpExpired, setIsRsvpExpired]   = useState(false);
-  const [wishesPerPage, setWishesPerPage] = useState(1);
+  const [activeWish, setActiveWish]         = useState(0);
 
   const audioRef   = useRef<HTMLAudioElement>(null);
   const heroRef    = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
+  const wishesRef  = useRef<HTMLDivElement>(null);
   const rsvpFormRef = useRef<HTMLFormElement>(null);
   const statusInputRef = useRef<HTMLInputElement>(null);
 
@@ -116,8 +117,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const isDeclined  = guest.status === 'declined';
 
   useEffect(() => {
-    // Bloqueo de confirmación a partir del 16 de Agosto de 2026
-    setIsRsvpExpired(new Date() >= new Date('2026-08-16T00:00:00'));
+    // Bloqueo de confirmación a partir del 31 de Agosto de 2026
+    setIsRsvpExpired(new Date() >= new Date('2026-08-31T00:00:00'));
 
     setPetals(Array.from({ length: 14 }, (_, i) => ({
       id: i, left: Math.random() * 100, delay: Math.random() * 10,
@@ -127,16 +128,15 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   }, []);
 
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)');
-    const update = () => setWishesPerPage(mq.matches ? 2 : 1);
-    update();
-    if (mq.addEventListener) {
-      mq.addEventListener('change', update);
-      return () => mq.removeEventListener('change', update);
-    }
-    mq.addListener(update);
-    return () => mq.removeListener(update);
-  }, []);
+    const el = wishesRef.current;
+    if (!el || !messages || messages.length === 0) return;
+    const onScroll = () => {
+      const itemW = el.scrollWidth / messages.length;
+      setActiveWish(Math.round(el.scrollLeft / itemW));
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [isEnvelopeOpen, messages]);
 
   useEffect(() => {
     const target = new Date('2026-10-10T18:00:00').getTime();
@@ -239,14 +239,13 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   };
 
   const unitLabel: Record<string, string> = { days: 'Días', hours: 'Hrs', minutes: 'Min', seconds: 'Seg' };
-  const wishPages = useMemo(() => {
-    if (!messages || messages.length === 0) return [] as { name: string; text: string }[][];
-    const pages: { name: string; text: string }[][] = [];
-    for (let i = 0; i < messages.length; i += wishesPerPage) {
-      pages.push(messages.slice(i, i + wishesPerPage));
-    }
-    return pages;
-  }, [messages, wishesPerPage]);
+
+  const scrollToWish = useCallback((idx: number) => {
+    const el = wishesRef.current;
+    if (!el || !messages || messages.length === 0) return;
+    const itemW = el.scrollWidth / messages.length;
+    el.scrollTo({ left: itemW * idx, behavior: 'smooth' });
+  }, [messages]);
 
   return (
     <>
@@ -663,47 +662,49 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
             </section>
           )}
 
-          {/* ══ MURO DE LOS DESEOS (GUESTBOOK) ══ */}
+          {/* ══ MURO DE LOS DESEOS (GUESTBOOK) — Carrusel Horizontal ══ */}
           {messages && messages.length > 0 && (
-            <section className="mobile-sec-full sr no-print">
-              <div className="dark-card wishes-card">
-                <div className="dark-card-overlay" style={{ background: 'linear-gradient(160deg, #1A1710 0%, #2A3618 100%)' }} />
+            <section className="wishes-section sr no-print">
+              {/* Header fuera de la card oscura */}
+              <div className="wishes-header">
+                <div className="wish-orn-line-h" />
+                <QuoteFilledIcon size={16} className="text-[#A8956B] opacity-60 flex-shrink-0" />
+                <div className="wish-orn-line-h" />
+              </div>
+              <p className="eyebrow wishes-eyebrow">Muro de los Deseos</p>
 
-                <div className="wishes-shell">
-                  <p className="eyebrow text-[rgba(212,183,120,0.8)]">Muro de los Deseos</p>
-
-                  <div className={`wishes-rail hide-sb ${wishPages.length === 1 ? 'is-single' : ''}`}>
-                    {wishPages.map((page, pageIdx) => (
-                      <div key={`wish-page-${pageIdx}`} className="wish-page">
-                        <div className="wish-orn">
-                          <div className="wish-orn-line" />
-                          <div className="wish-orn-diamond" />
-                          <div className="wish-orn-line" />
-                        </div>
-                        <div className="wish-stack">
-                          {page.map((msg, idx) => (
-                            <div key={`wish-${pageIdx}-${idx}`} className="wish-card">
-                              <QuoteFilledIcon size={28} className="text-[#A8956B] opacity-30 mb-6" />
-                              <p className="wish-text">"{msg.text}"</p>
-                              <div className="wish-sep" />
-                              <p className="wish-author">{msg.name}</p>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="wish-orn">
-                          <div className="wish-orn-line" />
-                          <div className="wish-orn-diamond" />
-                          <div className="wish-orn-line" />
-                        </div>
+              {/* Carrusel horizontal — UN scroll horizontal, sin conflicto con la página */}
+              <div className="wishes-track-shell">
+                <div ref={wishesRef} className="wishes-track hide-sb">
+                  {messages.map((msg, idx) => (
+                    <div key={`wish-${idx}`} className={`wish-slide ${idx === activeWish ? 'is-active' : ''}`}>
+                      <div className="wish-card-v2">
+                        <QuoteFilledIcon size={22} className="wish-quote-icon" />
+                        <p className="wish-text-v2">{msg.text}</p>
+                        <div className="wish-sep-v2" />
+                        <p className="wish-author-v2">{msg.name}</p>
                       </div>
-                    ))}
-                  </div>
-
-                  {wishPages.length > 1 && (
-                    <p className="swipe-hint mt-4" style={{ color: 'rgba(212,183,120,0.5)' }}>Desliza para leer más</p>
-                  )}
+                    </div>
+                  ))}
                 </div>
               </div>
+
+              {/* Dots de navegación */}
+              {messages.length > 1 && (
+                <div className="wish-dots-wrap">
+                  <div className="wish-dots">
+                    {messages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => scrollToWish(idx)}
+                        className={`wish-dot ${idx === activeWish ? 'active' : ''}`}
+                        aria-label={`Deseo ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                  <p className="swipe-hint wishes-swipe-hint">Desliza para leer más</p>
+                </div>
+              )}
             </section>
           )}
 
@@ -772,7 +773,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                 <div className="rsvp-deadline">
                   <CalendarIcon size={20} className="text-[#4A5D23] flex-shrink-0" />
                   <div className="text-left">
-                    <strong className="block text-[#4A5D23] font-bold text-[13px] mb-0.5">Agradecemos tu confirmación antes del 15 de Agosto, por temas de logística.</strong>
+                    <strong className="block text-[#4A5D23] font-bold text-[13px] mb-0.5">Agradecemos tu confirmación antes del 31 de Agosto, por temas de logística.</strong>
                   </div>
                 </div>
                 <div className="text-center mb-8">
@@ -1086,20 +1087,33 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
         .gallery-swipe-hint { margin-top:14px; }
         .swipe-hint { font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:rgba(168,149,107,.38); text-align:center; margin-top:12px; padding:0 16px; }
 
-        /* Wishes Wall */
-        .wishes-card { min-height:72dvh; }
-        .wishes-shell { position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:space-between; width:100%; height:100%; padding:36px 0 28px; gap:16px; }
-        .wishes-rail { width:100%; flex:1; min-height:0; display:flex; flex-direction:column; gap:18px; overflow-y:auto; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; padding:0 22px; }
-        .wishes-rail.is-single { overflow-y:hidden; }
-        .wish-page { scroll-snap-align:start; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:8px 0; }
-        .wish-stack { display:flex; flex-direction:column; gap:14px; align-items:center; width:100%; }
-        .wish-orn { display:flex; align-items:center; justify-content:center; gap:10px; }
-        .wish-orn-line { width:46px; height:1px; background:rgba(212,183,120,0.35); }
-        .wish-orn-diamond { width:6px; height:6px; background:rgba(212,183,120,0.5); transform:rotate(45deg); }
-        .wish-card { width:100%; max-width:420px; background:rgba(253,252,249,0.03); border:1px solid rgba(212,183,120,0.14); padding:40px 28px; display:flex; flex-direction:column; align-items:center; text-align:center; border-radius:14px; box-shadow:0 18px 38px -28px rgba(0,0,0,0.5); }
-        .wish-text { font-family:var(--ff-d); font-size:1.35rem; font-style:italic; color:#FDFCF9; line-height:1.6; font-weight:300; }
-        .wish-sep { width:32px; height:1px; background:rgba(212,183,120,0.25); margin:24px 0; }
-        .wish-author { font-family:var(--ff-b); font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold-lt); font-weight:500; }
+        /* ══ Wishes Wall — Carrusel Horizontal (sin doble scroll) ══ */
+        .wishes-section {
+          width:100%; padding:56px 0 48px;
+          display:flex; flex-direction:column; align-items:center;
+          background:linear-gradient(180deg, var(--cream) 0%, #1A1710 18%, #1E2712 82%, var(--cream) 100%);
+        }
+        .wishes-header { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:0 24px; margin-bottom:12px; }
+        .wish-orn-line-h { flex:1; max-width:60px; height:1px; background:rgba(212,183,120,0.35); }
+        .wishes-eyebrow { color:rgba(212,183,120,0.85) !important; margin-bottom:28px; }
+        .wishes-track-shell { position:relative; width:100%; }
+        .wishes-track-shell::before, .wishes-track-shell::after { content:''; position:absolute; top:0; bottom:0; width:28px; pointer-events:none; z-index:2; }
+        .wishes-track-shell::before { left:0; background:linear-gradient(to right, #1A1710 0%, transparent 100%); }
+        .wishes-track-shell::after  { right:0; background:linear-gradient(to left, #1A1710 0%, transparent 100%); }
+        .wishes-track { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; gap:16px; padding:8px 20px 16px; }
+        .wish-slide { min-width:calc(88vw - 16px); max-width:400px; flex-shrink:0; scroll-snap-align:center; opacity:.55; transform:scale(.96); transition:transform .4s ease, opacity .4s ease; }
+        .wish-slide.is-active { opacity:1; transform:scale(1); }
+        .wish-card-v2 { background:rgba(253,252,249,0.04); border:1px solid rgba(212,183,120,0.18); border-radius:20px; padding:36px 28px 32px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:0 24px 48px -24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,183,120,0.08); height:100%; }
+        .wish-quote-icon { color:#A8956B; opacity:0.35; margin-bottom:20px; flex-shrink:0; }
+        .wish-text-v2 { font-family:var(--ff-d); font-size:clamp(1.2rem,4.8vw,1.5rem); font-style:italic; color:#F8F5EE; line-height:1.65; font-weight:300; flex:1; }
+        .wish-sep-v2 { width:28px; height:1px; background:rgba(212,183,120,0.3); margin:22px 0 18px; flex-shrink:0; }
+        .wish-author-v2 { font-family:var(--ff-b); font-size:9px; letter-spacing:.38em; text-transform:uppercase; color:var(--gold-lt); font-weight:600; opacity:0.9; }
+        .wish-dots-wrap { display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:20px; }
+        .wish-dots { display:flex; justify-content:center; gap:8px; }
+        .wish-dot { width:8px; height:8px; border-radius:50%; background:rgba(212,183,120,0.25); border:1px solid rgba(212,183,120,0.4); cursor:pointer; padding:0; transition:background .3s, transform .3s, box-shadow .3s; position:relative; -webkit-tap-highlight-color:transparent; }
+        .wish-dot::before { content:''; position:absolute; inset:-10px; }
+        .wish-dot.active { background:var(--gold-lt); transform:scale(1.2); box-shadow:0 0 0 3px rgba(212,183,120,0.2); }
+        .wishes-swipe-hint { color:rgba(212,183,120,0.45) !important; }
 
         /* RSVP */
         .rsvp-card  { background:white; border:1px solid var(--stone); padding:3rem 1.6rem; border-radius:16px; position:relative; overflow:hidden; box-shadow:0 24px 50px -24px rgba(0,0,0,.2); }
@@ -1183,11 +1197,12 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
           .rsvp-card { padding:3rem 3rem; }
           .mobile-sec { padding:0 32px; }
           .corner-frame { width:28px; height:28px; }
-          .wishes-card { min-height:68dvh; }
-          .wishes-shell { padding:48px 0 40px; }
-          .wishes-rail { padding:0 48px; gap:22px; }
-          .wish-page { padding:10px 0; }
-          .wish-card { padding:46px 36px; }
+          .wish-slide { min-width:380px; max-width:460px; }
+          .wishes-track { padding:8px 40px 20px; gap:20px; }
+          .wishes-track-shell::before { background:linear-gradient(to right, #1A1710 0%, transparent 100%); }
+          .wishes-track-shell::after  { background:linear-gradient(to left, #1A1710 0%, transparent 100%); }
+          .wish-card-v2 { padding:48px 40px 42px; }
+          .wish-text-v2 { font-size:1.5rem; }
           .confirm-modal-backdrop { align-items:center; padding:24px; }
           .confirm-modal-card { padding:26px 22px 20px; }
         }
