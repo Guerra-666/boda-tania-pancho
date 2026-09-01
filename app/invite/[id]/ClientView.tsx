@@ -117,8 +117,8 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
   const isDeclined  = guest.status === 'declined';
 
   useEffect(() => {
-    // Bloqueo de confirmación a partir del 31 de Agosto de 2026
-    setIsRsvpExpired(new Date() >= new Date('2026-08-31T00:00:00'));
+    // Bloqueo de confirmación a partir del sábado 5 de septiembre de 2026
+    setIsRsvpExpired(new Date() >= new Date('2026-09-05T00:00:00'));
 
     setPetals(Array.from({ length: 14 }, (_, i) => ({
       id: i, left: Math.random() * 100, delay: Math.random() * 10,
@@ -773,7 +773,7 @@ export default function ClientView({ guest, messages = MOCK_WISHES }: { guest: a
                 <div className="rsvp-deadline">
                   <CalendarIcon size={20} className="text-[#4A5D23] flex-shrink-0" />
                   <div className="text-left">
-                    <strong className="block text-[#4A5D23] font-bold text-[13px] mb-0.5">Agradecemos tu confirmación antes del 31 de Agosto, por temas de logística.</strong>
+                    <strong className="block text-[#4A5D23] font-bold text-[13px] mb-0.5">Agradecemos tu confirmación hasta el viernes 4 de septiembre a las 11:59 de la noche, por temas de logística.</strong>
                   </div>
                 </div>
                 <div className="text-center mb-8">
